@@ -1,0 +1,62 @@
+import { useState, useEffect, useCallback } from 'react';
+
+export const useThrottledFetch = <T,>(
+  url: string,
+  minInterval = 60000, // 1 minute by default
+  maxJitter = 20000 // 20 seconds jitter
+) => {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      setData(result);
+      setError(null);
+      setLastFetchTime(Date.now());
+      return result;
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err as Error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const scheduleNextFetch = () => {
+      const jitter = Math.random() * maxJitter;
+      const timeSinceLastFetch = Date.now() - lastFetchTime;
+      const timeToNextFetch = Math.max(0, minInterval + jitter - timeSinceLastFetch);
+      
+      timeoutId = setTimeout(() => {
+        fetchData().finally(() => {
+          scheduleNextFetch();
+        });
+      }, timeToNextFetch);
+    };
+
+    // Initial fetch
+    fetchData().finally(() => {
+      if (!error) {
+        scheduleNextFetch();
+      }
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [fetchData, lastFetchTime, minInterval, maxJitter, error]);
+
+  return { data, loading, error, lastFetchTime };
+};
