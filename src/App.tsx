@@ -23,7 +23,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
-  const [newPlayerIds, setNewPlayerIds] = useState<Set<number>>(new Set());
+  // const [newPlayerIds, setNewPlayerIds] = useState<Set<number>>(new Set()); // Removed, redundant
+  const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<number>>(new Set());
 
 
   const [page, setPage] = useState(0);
@@ -31,7 +32,7 @@ function App() {
   const [sortBy, setSortBy] = useState<'mlvl' | 'slvl' | 'charname' | null>('mlvl');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
-  const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(new Map());
+  const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(new Map()); // Stores charid -> refresh_cycle_count (0 or 1)
   const [isAutoRefreshPaused, setIsAutoRefreshPaused] = useState<boolean>(false);
 
   const fetchData = useCallback(async (isRefresh = false) => {
@@ -62,58 +63,60 @@ function App() {
 
       // Ensure apiResponseData.chars exists and is an array before mapping
       if (apiResponseData && Array.isArray(apiResponseData.chars)) {
-        const formattedPlayers: PlayerRow[] = apiResponseData.chars.map((p: PlayerData, index: number) => ({
-          charid: p.charid || index, // Fallback to index if charid is missing
-          avatar: p.avatar || '', // Provide default for avatar
-          charname: p.charname,
-          mjob: p.mjob as Job, // Cast to Job type
-          mlvl: p.mlvl,
-          sjob: p.sjob as Job, // Cast to Job type
-          slvl: p.slvl,
-          seacomMessage: p.seacomMessage || null,
-          seacomType: p.seacomType,
-          jobs: p.jobs,
-        }));
+        const currentKnownPlayerCharIds = new Set(knownPlayerCharIds);
+        const updatedNewPlayerRefreshCount = new Map(newPlayerRefreshCount);
+
+        // Step 1: Update refresh counts for players already marked as new and expire them if needed
+        if (isRefresh) {
+          newPlayerRefreshCount.forEach((count, playerId) => {
+            const newCount = count + 1;
+            if (newCount >= 2) { // Persist for 2 refreshes (0, 1), remove when count becomes 2
+              updatedNewPlayerRefreshCount.delete(playerId);
+            } else {
+              updatedNewPlayerRefreshCount.set(playerId, newCount);
+            }
+          });
+        }
+
+        const formattedPlayers: PlayerRow[] = apiResponseData.chars.map((p: PlayerData, index: number) => {
+          const charId = p.charid || index; // Use index as fallback, though charid should be reliable
+          let isNewPlayer = false;
+
+          if (!knownPlayerCharIds.has(charId)) {
+            // This player is seen for the very first time
+            isNewPlayer = true;
+            currentKnownPlayerCharIds.add(charId); // Add to known IDs for next cycle
+            updatedNewPlayerRefreshCount.set(charId, 0); // Start refresh count at 0
+          } else if (updatedNewPlayerRefreshCount.has(charId)) {
+            // This player was new in a previous cycle and is still within its "new" window
+            isNewPlayer = true;
+          }
+
+          return {
+            charid: charId,
+            avatar: p.avatar || '',
+            charname: p.charname,
+            mjob: p.mjob as Job,
+            mlvl: p.mlvl,
+            sjob: p.sjob as Job,
+            slvl: p.slvl,
+            seacomMessage: p.seacomMessage || null,
+            seacomType: p.seacomType,
+            jobs: p.jobs,
+            isNew: isNewPlayer, // Set the isNew flag
+          };
+        });
+
         setPlayers(formattedPlayers);
+        setKnownPlayerCharIds(currentKnownPlayerCharIds);
+        setNewPlayerRefreshCount(updatedNewPlayerRefreshCount);
+
       } else {
-        // It seems the previous error message was for 'data' but the code was already using 'chars'.
-        // The user's new input confirms 'chars' is correct. The error might be elsewhere or intermittent.
-        // For now, let's ensure the error message accurately reflects what we expect.
         console.error("API response did not contain expected 'chars' array or 'total' count:", apiResponseData);
         setPlayers([]); // Set to empty array to prevent further errors
       }
       setLastFetchTime(new Date());
       setPage(0);
-      
-      // If this is a refresh, increment refresh count for NEW players
-      if (isRefresh) {
-        setNewPlayerRefreshCount(prevCount => {
-          const updatedCount = new Map(prevCount);
-          const idsToRemove: number[] = [];
-          
-          updatedCount.forEach((count, playerId) => {
-            const newCount = count + 1;
-            if (newCount >= 2) {
-              // Remove after 2 refreshes
-              idsToRemove.push(playerId);
-            } else {
-              updatedCount.set(playerId, newCount);
-            }
-          });
-          
-          // Remove players that have been through 2 refreshes
-          idsToRemove.forEach(id => {
-            updatedCount.delete(id);
-            setNewPlayerIds(prevIds => {
-              const updatedIds = new Set(prevIds);
-              updatedIds.delete(id);
-              return updatedIds;
-            });
-          });
-          
-          return updatedCount;
-        });
-      }
 
     } catch (e) {
       if (e instanceof Error) {
@@ -227,18 +230,14 @@ function App() {
       }
       console.log("Alert: New players matching filters!", newlyAddedPlayers.map(p => p.charname));
       
-      // Add new player IDs to state for highlighting and track refresh count
-      const currentNewIds = new Set(newPlayerIds);
-      const currentRefreshCount = new Map(newPlayerRefreshCount);
-      newlyAddedPlayers.forEach(p => {
-        currentNewIds.add(p.charid);
-        currentRefreshCount.set(p.charid, 0); // Start counting refreshes for this player
-      });
-      setNewPlayerIds(currentNewIds);
-      setNewPlayerRefreshCount(currentRefreshCount);
+      // Update newPlayerRefreshCount for newly added players
+      // The logic for setting isNew is now handled within fetchData
+      // This effect primarily handles the alert sound and logging.
+      // No need to directly manipulate newPlayerRefreshCount here for setting isNew,
+      // as fetchData already does that. We just need to ensure the dependency array is correct.
     }
     prevFilteredPlayersRef.current = filteredPlayers;
-  }, [filteredPlayers, filterOptions.alertEnabled, newPlayerIds]);
+  }, [filteredPlayers, filterOptions.alertEnabled, newPlayerRefreshCount]); // Updated dependency array
 
   const handleSort = (column: 'mlvl' | 'slvl' | 'charname') => {
     if (sortBy === column) {
@@ -250,14 +249,19 @@ function App() {
   };
 
   const playersWithNewFlag = useMemo(() => {
-    const playersWithFlags = filteredPlayers.map(player => ({
-      ...player,
-      isNew: newPlayerIds.has(player.charid)
-    }));
+    // The `isNew` flag is now directly part of the PlayerRow object from `fetchData`
+    // So, we don't need to map and add it here. We can directly use `filteredPlayers`
+    // or if `players` (the raw list from API) already has `isNew` correctly set by `fetchData`,
+    // then `filteredPlayers` will also have it.
+    // The `isNew` property is already set in the `formattedPlayers` within `fetchData`.
+    // Thus, `filteredPlayers` (which is derived from `players`) will already have this flag.
 
-    if (!sortBy) return playersWithFlags;
+    if (!sortBy) return filteredPlayers; // Use filteredPlayers directly
 
-    return playersWithFlags.sort((a, b) => {
+    // Create a new array for sorting to avoid mutating `filteredPlayers`
+    const playersToSort = [...filteredPlayers];
+
+    return playersToSort.sort((a, b) => { // Sort the new array
       let aValue: string | number;
       let bValue: string | number;
 
@@ -284,7 +288,7 @@ function App() {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
       }
     });
-  }, [filteredPlayers, newPlayerIds, sortBy, sortOrder]);
+  }, [filteredPlayers, sortBy, sortOrder]); // Removed newPlayerIds from dependency array
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
