@@ -196,14 +196,28 @@ function App() {
     const newlyAddedPlayers = filteredPlayers.filter(p => !previousFilteredIds.has(p.charid));
 
     if (filterOptions.alertEnabled && newlyAddedPlayers.length > 0) {
-      // Play sound with correct path
-      const audio = new Audio('/chocobo.mp3'); // Try mp3 first
-      audio.play().catch(err => {
-        console.error("Error playing sound:", err);
-        // Try alternative audio file
-        const altAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
-        altAudio.play().catch(() => console.log('Audio notification not available'));
-      });
+      // Play FFXI-style ring notification sound
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // FFXI-style bell ring: high frequency with quick decay
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+        oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.3);
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } catch (err) {
+        console.log('Audio notification not available:', err);
+      }
       console.log("Alert: New players matching filters!", newlyAddedPlayers.map(p => p.charname));
       
       // Add new player IDs to state for highlighting and track refresh count
