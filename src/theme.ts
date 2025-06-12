@@ -2,64 +2,101 @@ import { createTheme } from '@mui/material/styles';
 
 // Removed Theme and ThemeOptions declarations for ffxiColors as it's not used.
 
-// Theme colors based on the provided image
-const IMAGE_MAIN_BG = '#1C1C1C'; // Very dark grey, almost black from image
-const IMAGE_TABLE_ROW_BG = '#2A2A2A'; // Dark grey for table rows, slightly lighter than main BG
-const IMAGE_TABLE_HEADER_BG = '#222222'; // Slightly darker grey for table header
-const IMAGE_TEXT_PRIMARY = '#E0E0E0'; // Light grey/off-white for primary text
-const IMAGE_TEXT_SECONDARY = '#A0A0A0'; // Muted grey for secondary text
-const IMAGE_ACCENT_GOLD = '#B8860B'; // Gold for accents, borders (similar to FFXI_GOLD)
-const FFXI_BLUE = '#1A2B4C'; // Kept for primary button, can be reviewed
+// HorizonXI Premium Dark Blue Theme
+const HORIZON_DEEP_BLUE = '#0A1628'; // Deep navy blue background
+const HORIZON_DARK_BLUE = '#1A2332'; // Dark blue for surfaces
+const HORIZON_MEDIUM_BLUE = '#243447'; // Medium blue for elevated surfaces
+const HORIZON_ACCENT_BLUE = '#2E4A78'; // Accent blue for highlights
+const HORIZON_GOLD = '#D4AF37'; // Premium gold for accents
+const HORIZON_LIGHT_GOLD = '#F4E4BC'; // Light gold for text highlights
+const HORIZON_TEXT_PRIMARY = '#E8F4FD'; // Light blue-white for primary text
+const HORIZON_TEXT_SECONDARY = '#94A3B8'; // Muted blue-grey for secondary text
+const HORIZON_BORDER = '#334155'; // Subtle blue-grey borders
 
 export const ffxiTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: FFXI_BLUE, // For primary actions if any, e.g., specific buttons
-      contrastText: IMAGE_TEXT_PRIMARY,
+      main: HORIZON_ACCENT_BLUE,
+      contrastText: HORIZON_TEXT_PRIMARY,
     },
     secondary: {
-      main: IMAGE_ACCENT_GOLD, // For accents, highlights
-      contrastText: IMAGE_MAIN_BG, 
+      main: HORIZON_GOLD,
+      contrastText: HORIZON_DEEP_BLUE,
     },
     background: {
-      default: IMAGE_MAIN_BG,
-      paper: IMAGE_TABLE_ROW_BG, // Used for table rows, cards etc.
+      default: HORIZON_DEEP_BLUE,
+      paper: HORIZON_DARK_BLUE,
     },
     text: {
-      primary: IMAGE_TEXT_PRIMARY,
-      secondary: IMAGE_TEXT_SECONDARY,
+      primary: HORIZON_TEXT_PRIMARY,
+      secondary: HORIZON_TEXT_SECONDARY,
     },
-    divider: 'rgba(184, 134, 11, 0.2)', // IMAGE_ACCENT_GOLD with alpha, subtler
+    divider: HORIZON_BORDER,
+  },
+  typography: {
+    fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+    h1: {
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontWeight: 700,
+      letterSpacing: '0.5px',
+    },
+    h2: {
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontWeight: 600,
+      letterSpacing: '0.25px',
+    },
+    h3: {
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontWeight: 600,
+      letterSpacing: '0.15px',
+    },
+    body1: {
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontWeight: 400,
+      letterSpacing: '0.15px',
+    },
+    body2: {
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontWeight: 400,
+      letterSpacing: '0.25px',
+    },
+    button: {
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+      textTransform: 'none',
+    },
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: IMAGE_MAIN_BG, // Ensure body background matches
-          color: IMAGE_TEXT_PRIMARY,      // Default text color for the body
-          scrollbarColor: `${IMAGE_ACCENT_GOLD} ${IMAGE_TABLE_ROW_BG}`,
+          fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
+          backgroundColor: HORIZON_DEEP_BLUE,
+          color: HORIZON_TEXT_PRIMARY,
+          scrollbarColor: `${HORIZON_GOLD} ${HORIZON_DARK_BLUE}`,
           '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
-            backgroundColor: IMAGE_TABLE_ROW_BG, // Scrollbar track
-            width: '10px',
+            backgroundColor: HORIZON_DARK_BLUE,
+            width: '12px',
           },
           '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
-            borderRadius: 8,
-            backgroundColor: IMAGE_ACCENT_GOLD, // Scrollbar thumb
+            borderRadius: 6,
+            backgroundColor: HORIZON_GOLD,
             minHeight: 24,
-            border: `3px solid ${IMAGE_TABLE_ROW_BG}`,
+            border: `2px solid ${HORIZON_DARK_BLUE}`,
           },
           '&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus': {
-            backgroundColor: '#DAA520', // Lighter gold on focus
+            backgroundColor: HORIZON_LIGHT_GOLD,
           },
           '&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active': {
-            backgroundColor: '#DAA520',
+            backgroundColor: HORIZON_LIGHT_GOLD,
           },
           '&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: '#DAA520',
+            backgroundColor: HORIZON_LIGHT_GOLD,
           },
           '&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner': {
-            backgroundColor: IMAGE_TABLE_ROW_BG,
+            backgroundColor: HORIZON_DARK_BLUE,
           },
         },
       },
@@ -67,11 +104,11 @@ export const ffxiTheme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          // background: `linear-gradient(145deg, ${IMAGE_TABLE_HEADER_BG}, ${IMAGE_MAIN_BG})`,
-          background: IMAGE_TABLE_HEADER_BG, // Solid dark color for app bar, matching image header style
-          borderBottom: `1px solid ${IMAGE_ACCENT_GOLD}`, // Subtler border
-          boxShadow: `0 1px 5px rgba(184, 134, 11, 0.2)`,
-          color: IMAGE_TEXT_PRIMARY,
+          background: `linear-gradient(135deg, ${HORIZON_MEDIUM_BLUE}, ${HORIZON_DARK_BLUE})`,
+          borderBottom: `2px solid ${HORIZON_GOLD}`,
+          boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(212, 175, 55, 0.1)`,
+          color: HORIZON_TEXT_PRIMARY,
+          backdropFilter: 'blur(10px)',
         },
       },
     },
@@ -79,87 +116,113 @@ export const ffxiTheme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          fontWeight: 'bold',
-          borderRadius: '4px',
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor: IMAGE_ACCENT_GOLD,
-          transition: 'all 0.3s ease',
-          letterSpacing: '0.5px',
-        },
-        containedPrimary: { // Use this for primary actions if needed
-          backgroundColor: FFXI_BLUE, // Keeping FFXI_BLUE for a distinct primary button
-          color: IMAGE_TEXT_PRIMARY,
+          fontWeight: 600,
+          borderRadius: '6px',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          letterSpacing: '0.3px',
+          padding: '8px 16px',
+          cursor: 'pointer',
           '&:hover': {
-            backgroundColor: '#2A3F6C', // Slightly lighter blue
-            boxShadow: `0 0 8px ${IMAGE_ACCENT_GOLD}`,
+            cursor: 'pointer',
           },
         },
-        containedSecondary: { // Use this for gold accent buttons
-          backgroundColor: IMAGE_ACCENT_GOLD,
-          color: IMAGE_MAIN_BG, // Dark text on gold button
-          borderColor: IMAGE_MAIN_BG, 
+        sizeSmall: {
+          padding: '6px 12px',
+          fontSize: '0.8rem',
+        },
+        containedPrimary: {
+          background: `linear-gradient(135deg, ${HORIZON_ACCENT_BLUE}, ${HORIZON_MEDIUM_BLUE})`,
+          color: HORIZON_TEXT_PRIMARY,
+          border: `1px solid ${HORIZON_BORDER}`,
+          boxShadow: `0 4px 12px rgba(46, 74, 120, 0.3)`,
           '&:hover': {
-            backgroundColor: '#DAA520', // Lighter gold
-            borderColor: IMAGE_MAIN_BG,
-            boxShadow: `0 0 8px ${IMAGE_TEXT_PRIMARY}`,
+            background: `linear-gradient(135deg, ${HORIZON_MEDIUM_BLUE}, ${HORIZON_ACCENT_BLUE})`,
+            boxShadow: `0 6px 20px rgba(46, 74, 120, 0.4), 0 0 20px rgba(212, 175, 55, 0.2)`,
+            transform: 'translateY(-2px)',
           },
         },
-        outlinedPrimary: {
-          borderColor: IMAGE_ACCENT_GOLD, // Gold outline
-          color: IMAGE_TEXT_PRIMARY, 
+        containedSecondary: {
+          background: `linear-gradient(135deg, ${HORIZON_GOLD}, #B8860B)`,
+          color: HORIZON_DEEP_BLUE,
+          border: `1px solid ${HORIZON_GOLD}`,
+          boxShadow: `0 4px 12px rgba(212, 175, 55, 0.3)`,
           '&:hover': {
-            backgroundColor: 'rgba(184, 134, 11, 0.1)', // IMAGE_ACCENT_GOLD with alpha
-            borderColor: '#DAA520', // Lighter gold border on hover
-            color: '#DAA520',
+            background: `linear-gradient(135deg, ${HORIZON_LIGHT_GOLD}, ${HORIZON_GOLD})`,
+            boxShadow: `0 6px 20px rgba(212, 175, 55, 0.4)`,
+            transform: 'translateY(-2px)',
+          },
+        },
+        outlined: {
+          borderColor: HORIZON_GOLD,
+          color: HORIZON_GOLD,
+          borderWidth: '2px',
+          '&:hover': {
+            backgroundColor: `rgba(212, 175, 55, 0.1)`,
+            borderColor: HORIZON_LIGHT_GOLD,
+            color: HORIZON_LIGHT_GOLD,
+            boxShadow: `0 0 20px rgba(212, 175, 55, 0.3)`,
           },
         },
       },
     },
-    MuiPaper: { // This will affect FilterBar and other Paper components
+    MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: IMAGE_TABLE_ROW_BG, // Using table row color for general paper elements
-          backgroundImage: 'none',
-          border: `1px solid rgba(184, 134, 11, 0.3)`, // Subtler gold border
-          boxShadow: `0 2px 8px rgba(0, 0, 0, 0.4)`,
-          borderRadius: '4px', // Slightly smaller radius, closer to image style
+          backgroundColor: HORIZON_DARK_BLUE,
+          backgroundImage: `linear-gradient(135deg, ${HORIZON_DARK_BLUE}, ${HORIZON_MEDIUM_BLUE})`,
+          border: `1px solid ${HORIZON_BORDER}`,
+          boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(212, 175, 55, 0.1)`,
+          borderRadius: '12px',
+          backdropFilter: 'blur(10px)',
         },
       },
     },
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: IMAGE_TABLE_HEADER_BG, // Darker background for table head, as in image
-          borderBottom: `1px solid ${IMAGE_ACCENT_GOLD}`, // Gold border for head
+          background: `linear-gradient(135deg, ${HORIZON_MEDIUM_BLUE}, ${HORIZON_ACCENT_BLUE})`,
+          borderBottom: `2px solid ${HORIZON_GOLD}`,
+          '& .MuiTableCell-head': {
+            color: HORIZON_TEXT_PRIMARY,
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase',
+          },
         }
       }
     },
     MuiTableCell: {
       styleOverrides: {
         head: {
-          color: IMAGE_TEXT_PRIMARY, // Light text for header cells, as in image
-          fontWeight: 'normal', // Image header text is not particularly bold
-          textTransform: 'none', // Image header text is not uppercase
-          letterSpacing: '0.5px',
-          borderBottom: 'none', // Handled by MuiTableHead root border
-          padding: '8px 12px', // Adjust padding to match image density
-          fontSize: '0.85rem',
+          color: HORIZON_TEXT_PRIMARY,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.3px',
+          borderBottom: 'none',
+          padding: '12px 16px',
+          fontSize: '0.8rem',
         },
         body: {
-          color: IMAGE_TEXT_PRIMARY,
-          borderColor: `rgba(120, 120, 120, 0.2)`, // Subtle grey border for row separation
-          padding: '6px 12px', // Adjust padding for density
+          color: HORIZON_TEXT_PRIMARY,
+          borderColor: HORIZON_BORDER,
+          padding: '8px 16px',
           fontSize: '0.8rem',
+          cursor: 'default',
+          '&:hover': {
+            backgroundColor: `rgba(212, 175, 55, 0.05)`,
+            cursor: 'pointer',
+          },
         },
       },
     },
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: IMAGE_TEXT_SECONDARY,
+          color: HORIZON_TEXT_SECONDARY,
+          fontWeight: 500,
           '&.Mui-focused': {
-            color: IMAGE_ACCENT_GOLD,
+            color: HORIZON_GOLD,
           },
         },
       },
@@ -167,36 +230,46 @@ export const ffxiTheme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
+          borderRadius: '6px',
+          backgroundColor: `rgba(26, 35, 50, 0.5)`,
+          cursor: 'text',
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(184, 134, 11, 0.4)', // Gold with alpha for outline
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: IMAGE_ACCENT_GOLD,
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: IMAGE_ACCENT_GOLD,
+            borderColor: HORIZON_BORDER,
             borderWidth: '1px',
           },
-          color: IMAGE_TEXT_PRIMARY,
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: HORIZON_GOLD,
+            cursor: 'text',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: HORIZON_GOLD,
+            borderWidth: '2px',
+            boxShadow: `0 0 0 2px rgba(212, 175, 55, 0.1)`,
+          },
+          color: HORIZON_TEXT_PRIMARY,
         },
-        notchedOutline: {
-          borderColor: 'rgba(184, 134, 11, 0.4)',
+        input: {
+          padding: '10px 12px',
+          fontSize: '0.85rem',
         },
       },
     },
     MuiSelect: {
       styleOverrides: {
         icon: {
-          color: IMAGE_TEXT_SECONDARY,
+          color: HORIZON_GOLD,
         },
       },
     },
     MuiCheckbox: {
       styleOverrides: {
         root: {
-          color: IMAGE_TEXT_SECONDARY,
+          color: HORIZON_TEXT_SECONDARY,
           '&.Mui-checked': {
-            color: IMAGE_ACCENT_GOLD,
+            color: HORIZON_GOLD,
+          },
+          '&:hover': {
+            backgroundColor: `rgba(212, 175, 55, 0.1)`,
           },
         },
       },
@@ -204,13 +277,16 @@ export const ffxiTheme = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          backgroundColor: IMAGE_TABLE_HEADER_BG, // Dark tooltip background
-          color: IMAGE_TEXT_PRIMARY,
-          border: `1px solid ${IMAGE_ACCENT_GOLD}`,
-          fontSize: '0.75rem',
+          backgroundColor: HORIZON_MEDIUM_BLUE,
+          color: HORIZON_TEXT_PRIMARY,
+          border: `1px solid ${HORIZON_GOLD}`,
+          borderRadius: '8px',
+          fontSize: '0.8rem',
+          fontWeight: 500,
+          boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3)`,
         },
         arrow: {
-          color: IMAGE_ACCENT_GOLD,
+          color: HORIZON_GOLD,
         },
       },
     },

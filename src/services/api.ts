@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { ApiResponse } from '../types';
+import type { ApiResponse } from '../types/index';
 
 const API_BASE_URL = 'https://api.horizonxi.com/api/v1/chars/lfp';
 
@@ -48,6 +48,6 @@ export const fetchPlayers = async (): Promise<ApiResponse> => {
       console.error('Unexpected error:', error);
     }
     // Return empty data instead of throwing to prevent app crash
-    return { meta:{total: 0}, data: [] };
+    return { total: 0, chars: [] };
   }
 };

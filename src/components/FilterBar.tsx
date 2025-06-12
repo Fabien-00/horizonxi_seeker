@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
-import { TextField, FormControl, InputLabel, Typography, Paper, Button } from '@mui/material'; // Removed Select, FormControlLabel, Checkbox
-// import type { SelectChangeEvent } from '@mui/material/Select'; // No longer needed for Select
+import React, { useState, useEffect, useMemo } from 'react';
+import { Paper, TextField, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, IconButton, Badge, Box } from '@mui/material';
+import { NotificationsActive, NotificationsOff } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
-import type { FilterOptions, Job } from '../types';
+import { type FilterOptions, type Job } from '../types/index';
+import { HORIZON_JOB_ABBREVIATIONS } from '../types/index';
 
 interface FilterBarProps {
   filterOptions: FilterOptions;
@@ -21,36 +22,52 @@ const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) =
   return debounced as (...args: Parameters<F>) => ReturnType<F>;
 };
 
-// Mock JobSelectionDialog - currentMainJob and currentSubJob props are removed as they were unused warnings
 const JobSelectionDialog: React.FC<{ open: boolean; onClose: () => void; onApply: (jobs: { mainJob: Job | null; subJob: Job | null }) => void; mainJob: Job | null; subJob: Job | null; }> = ({ open, onClose, onApply, mainJob, subJob }) => {
-  if (!open) return null;
-  // Basic state for the dialog's own job selection if needed, or pass directly
   const [selectedMainJob, setSelectedMainJob] = useState<Job | null>(mainJob);
   const [selectedSubJob, setSelectedSubJob] = useState<Job | null>(subJob);
 
-  // Example jobs - replace with actual job list from types or props
-  const exampleJobs: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN'];
+  useEffect(() => {
+    setSelectedMainJob(mainJob);
+    setSelectedSubJob(subJob);
+  }, [open, mainJob, subJob]);
+
+  const handleApply = () => {
+    onApply({ mainJob: selectedMainJob, subJob: selectedSubJob });
+  };
 
   return (
-    <div style={{position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', padding: '20px', zIndex: 100, border: '1px solid #ccc', borderRadius: '8px'}}>
-      <Typography variant="h6">Select Jobs</Typography>
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Main Job</InputLabel>
-        <select value={selectedMainJob || ''} onChange={(e) => setSelectedMainJob(e.target.value as Job | null)} style={{padding: '10px', width: '100%'}}>
-          <option value="">Any</option>
-          {exampleJobs.map(job => <option key={`main-${job}`} value={job}>{job}</option>)}
-        </select>
-      </FormControl>
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Sub Job</InputLabel>
-        <select value={selectedSubJob || ''} onChange={(e) => setSelectedSubJob(e.target.value as Job | null)} style={{padding: '10px', width: '100%'}}>
-          <option value="">Any</option>
-          {exampleJobs.map(job => <option key={`sub-${job}`} value={job}>{job}</option>)}
-        </select>
-      </FormControl>
-      <Button onClick={() => onApply({ mainJob: selectedMainJob, subJob: selectedSubJob })} variant="contained" color="primary" style={{marginRight: '10px'}}>Apply</Button>
-      <Button onClick={onClose} variant="outlined">Close</Button>
-    </div>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Select Jobs</DialogTitle>
+      <DialogContent>
+        <Box sx={{ mt: 1 }}>
+          <Autocomplete
+            options={HORIZON_JOB_ABBREVIATIONS as Job[]}
+            getOptionLabel={(option) => option}
+            value={selectedMainJob}
+            onChange={(_event, newValue) => {
+              setSelectedMainJob(newValue as Job | null);
+            }}
+            renderInput={(params) => <TextField {...params} label="Main Job" variant="outlined" />}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <Autocomplete
+            options={HORIZON_JOB_ABBREVIATIONS as Job[]}
+            getOptionLabel={(option) => option}
+            value={selectedSubJob}
+            onChange={(_event, newValue) => {
+              setSelectedSubJob(newValue as Job | null);
+            }}
+            renderInput={(params) => <TextField {...params} label="Sub Job" variant="outlined" />}
+            fullWidth
+          />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleApply} variant="contained">Apply</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
@@ -70,18 +87,18 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
-    let processedValue: string | number = value;
+    let processedValue: string | number | '' = value;
     if (name === 'minLevel' || name === 'maxLevel') {
-      processedValue = value === '' ? '' : Number(value);
+      processedValue = value === '' ? ('' as number | '') : Number(value);
       if (isNaN(Number(processedValue)) && value !== '') return; // Prevent non-numeric input for levels unless empty
       if (Number(processedValue) < 1 && value !== '') processedValue = 1;
-      if (Number(processedValue) > 99 && value !== '') processedValue = 99;
+      if (Number(processedValue) > 75 && value !== '') processedValue = 75;
     }
 
     const newFilters = {
       ...localFilters,
       [name]: processedValue,
-    };
+    } as FilterOptions;
     setLocalFilters(newFilters);
     debouncedFilterChange(newFilters);
   };
@@ -105,17 +122,18 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
         mb: 2, 
         display: 'flex',
         flexWrap: 'wrap',
-        gap: theme.spacing(2),
+        gap: theme.spacing(2.5), // Increased gap for better separation
         alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: theme.palette.background.default,
         borderRadius: '0',
         borderBottom: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <Typography variant="subtitle2" sx={{ 
+      <Typography variant="subtitle1" sx={{ 
         mr: 1, 
-        color: theme.palette.text.secondary, 
-        fontSize: '0.8rem',
+        color: theme.palette.text.primary, // Changed to primary for more emphasis
+        fontSize: '0.9rem', // Slightly larger
         fontWeight: 'bold',
         textTransform: 'uppercase',
       }}>
@@ -127,15 +145,15 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
         onClick={() => setOpenJobDialog(true)} 
         size="small"
       >
-        {localFilters.mainJob || localFilters.subJob ? 
-          `Jobs: ${localFilters.mainJob || 'Any'} / ${localFilters.subJob || 'Any'}` : 
+        {(localFilters as any).mainJob || (localFilters as any).subJob ?
+          `Jobs: ${(localFilters as FilterOptions & { mainJob: Job | null }).mainJob || 'Any'} / ${(localFilters as FilterOptions & { subJob: Job | null }).subJob || 'Any'}` :
           'Select Jobs'}
       </Button>
       <JobSelectionDialog
         open={openJobDialog}
         onClose={() => setOpenJobDialog(false)}
-        mainJob={localFilters.mainJob}
-        subJob={localFilters.subJob}
+        mainJob={(localFilters as FilterOptions & { mainJob: Job | null }).mainJob}
+        subJob={(localFilters as FilterOptions & { subJob: Job | null }).subJob}
         onApply={handleJobChange}
       />
 
@@ -147,7 +165,7 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
         size="small"
         value={localFilters.minLevel}
         onChange={handleInputChange}
-        inputProps={{ min: 1, max: 99, style: { MozAppearance: 'textfield' } }} // Firefox style fix
+        inputProps={{ min: 1, max: 75, style: { MozAppearance: 'textfield' } }} // Firefox style fix
         InputLabelProps={{ shrink: true }}
         sx={{ width: 90, '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } }}
       />
@@ -160,20 +178,75 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
         size="small"
         value={localFilters.maxLevel}
         onChange={handleInputChange}
-        inputProps={{ min: 1, max: 99, style: { MozAppearance: 'textfield' } }} // Firefox style fix
+        inputProps={{ min: 1, max: 75, style: { MozAppearance: 'textfield' } }} // Firefox style fix
         InputLabelProps={{ shrink: true }}
         sx={{ width: 90, '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } }}
       />
 
       <TextField
         name="searchTerm"
-        label="Comment Search"
+        label="Search Name/Comment" // Clarified label
         variant="outlined"
         size="small"
         value={localFilters.searchTerm}
         onChange={handleInputChange}
         sx={{ maxWidth: 200 }}
       />
+
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => {
+          const resetFilters = {
+          searchTerm: '',
+          mainJob: null,
+          subJob: null,
+          minLevel: 1 as number | '',
+          maxLevel: 75 as number | '',
+          job: '' as Job | '',
+          jobType: 'any' as const,
+          alertEnabled: false,
+        };
+          setLocalFilters(resetFilters);
+          debouncedFilterChange(resetFilters);
+        }}
+        sx={{
+          color: theme.palette.error.main,
+          borderColor: theme.palette.error.main,
+          '&:hover': {
+            borderColor: theme.palette.error.dark,
+            backgroundColor: `rgba(244, 67, 54, 0.04)`,
+          },
+        }}
+      >
+        Reset Filters
+      </Button>
+
+      <IconButton
+        onClick={() => {
+          const newFilters = {
+            ...localFilters,
+            alertEnabled: !localFilters.alertEnabled,
+          };
+          setLocalFilters(newFilters);
+          debouncedFilterChange(newFilters);
+        }}
+        sx={{
+          color: localFilters.alertEnabled ? theme.palette.warning.main : theme.palette.text.secondary,
+          '&:hover': {
+            backgroundColor: `rgba(255, 193, 7, 0.08)`,
+          },
+        }}
+        title={localFilters.alertEnabled ? 'Disable notifications for new players' : 'Enable notifications for new players'}
+      >
+        {localFilters.alertEnabled ? (
+          <Badge color="warning" variant="dot">
+            <NotificationsActive />
+          </Badge>
+        ) : (
+          <NotificationsOff />
+        )}
+      </IconButton>
       {/* Removed Hide Full Parties Checkbox */}
     </Paper>
   );

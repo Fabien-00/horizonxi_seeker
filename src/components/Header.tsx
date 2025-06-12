@@ -1,32 +1,58 @@
 import { AppBar, Toolbar, Typography, Box, styled, useTheme } from '@mui/material';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  // Styles for AppBar will largely come from theme.ts MuiAppBar overrides
-  // backgroundColor: theme.palette.background.default, // Match image header background
-  // boxShadow: 'none', // Match image (no shadow on app bar)
-  // borderBottom: `1px solid ${theme.palette.divider}`, // Match image (subtle border)
-  padding: theme.spacing(0.5, 0), 
+  background: `linear-gradient(135deg, #243447 0%, #2E4A78 50%, #1A2332 100%)`,
+  borderBottom: `3px solid #D4AF37`,
+  boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), 0 0 60px rgba(212, 175, 55, 0.15)`,
+  backdropFilter: 'blur(20px)',
+  padding: theme.spacing(1, 0),
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.1) 50%, transparent 100%)',
+    pointerEvents: 'none',
+  },
 }));
 
 const Logo = styled('img')(({ theme }) => ({
-  height: '40px', // Adjusted to match image proportion
-  marginRight: theme.spacing(1.5),
+  height: '50px',
+  marginRight: theme.spacing(2),
+  borderRadius: '8px',
+  border: `2px solid #D4AF37`,
+  boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+    boxShadow: '0 6px 25px rgba(212, 175, 55, 0.5)',
+  },
 }));
 
-const Title = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.primary, // Match image text color
-  fontWeight: 'bold', // Match image
-  letterSpacing: '0.5px',
-  fontSize: '1.4rem', // Adjusted to match image proportion
-  textTransform: 'none', // As per image
+const Title = styled(Typography)(() => ({
+  background: 'linear-gradient(135deg, #E8F4FD 0%, #D4AF37 50%, #F4E4BC 100%)',
+  backgroundClip: 'text',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  fontWeight: 800,
+  letterSpacing: '1px',
+  fontSize: '1.8rem',
+  textShadow: '0 2px 10px rgba(212, 175, 55, 0.3)',
+  fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
 }));
 
 const Subtitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary, // Match image text color
-  marginLeft: theme.spacing(1.5), // Adjusted spacing
-  fontSize: '0.8rem', // Adjusted to match image proportion
+  color: '#94A3B8',
+  marginLeft: theme.spacing(2),
+  fontSize: '0.9rem',
   fontStyle: 'italic',
-  opacity: 0.8,
+  fontWeight: 500,
+  letterSpacing: '0.5px',
+  opacity: 0.9,
+  textShadow: '0 1px 3px rgba(0, 0, 0, 0.5)',
 }));
 
 // const HeaderLink = styled(Link)(({ theme }) => ({
@@ -46,15 +72,25 @@ const Header: React.FC = () => {
   return (
     <StyledAppBar position="sticky">
       {/* Toolbar content is centered, minHeight will be from theme or default */}
-      <Toolbar sx={{ justifyContent: 'center', minHeight: theme.mixins.toolbar.minHeight || '56px' }}> 
-        <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
+      <Toolbar sx={{ 
+        justifyContent: 'center', 
+        minHeight: '80px',
+        position: 'relative',
+        zIndex: 1,
+      }}> 
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          textAlign: 'center',
+          padding: theme.spacing(1),
+        }}>
           <Logo src="/chocobo.jpg" alt="HorizonXI Seeker Logo" />
           <Box>
-            <Title variant="h1"> {/* Changed to h1 for semantic though style is custom */}
-              HorizonXI Party Seeker
+            <Title variant="h1">
+              HorizonXI Seeker
             </Title>
             <Subtitle variant="body2">
-              Find your party, conquer Vana'diel!
+              Fait par moi 
             </Subtitle>
           </Box>
         </Box>

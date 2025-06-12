@@ -30,8 +30,8 @@ export interface PlayerRow {
   comment: string | null;
   seacomType?: number;
   seacomMessage?: string | null;
+  isNew?: boolean; // Added for new player highlighting
   // otherJobs: string[]; // This was in previous PlayerRow, review if needed
-  // isNew: boolean; // This was in previous PlayerRow, review if needed
 }
 
 export type JobType = 'main' | 'sub' | 'any';
@@ -42,6 +42,8 @@ export interface FilterOptions {
   subJob: Job | null;  // Added subJob, made it non-optional based on usage
   minLevel: number | ''; // Allow empty string for 'Any'
   maxLevel: number | ''; // Allow empty string for 'Any'
+  job: Job | ''; // Allow empty string for 'any job'
+  jobType: 'main' | 'sub' | 'any';
   alertEnabled: boolean;
   // hideFullParties: boolean; // Removed as per user request
 }
@@ -53,15 +55,15 @@ export interface ApiResponse {
 
 export type Job = 
   | 'WAR' | 'MNK' | 'WHM' | 'BLM' | 'RDM' | 'THF' | 'PLD' | 'DRK' | 'BST' | 'BRD' | 'RNG' 
-  | 'SAM' | 'NIN' | 'DRG' | 'SMN'; // Removed BLU, COR, PUP, DNC, RUN, GEO, MON for HorizonXI
+  | 'SAM' | 'NIN' | 'DRG' | 'SMN' | 'BLU' | 'COR' | 'PUP' | 'DNC' | 'GEO' | 'RUN' | 'MON';
 
-export const JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN'];
+export const JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU', 'COR', 'PUP', 'DNC', 'GEO', 'RUN', 'MON'];
 
-export const HORIZON_JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN'];
+export const HORIZON_JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU', 'COR', 'PUP', 'DNC', 'GEO', 'RUN', 'MON'];
 
 export type JobAbbreviation = typeof HORIZON_JOB_ABBREVIATIONS[number];
 
-export const JOB_COLORS: Record<JobAbbreviation | string, string> = { // Allow string for flexibility if new jobs are added dynamically
+export const JOB_COLORS: Record<JobAbbreviation | string, string> = { 
   'WAR': '#c79c6e', 'MNK': '#f4c030', 'WHM': '#f9da9d', 'BLM': '#a330c9',
   'RDM': '#f58cba', 'THF': '#f5e05e', 'PLD': '#c5e0fa', 'DRK': '#c41f3b',
   'BST': '#a9d0ac', 'BRD': '#ff7de3', 'RNG': '#abd473', 'SAM': '#e6b800',

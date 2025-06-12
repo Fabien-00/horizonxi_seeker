@@ -10,24 +10,35 @@ export const useThrottledFetch = <T,>(
   const [error, setError] = useState<Error | null>(null);
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isRefresh) {
+        setLoading(true);
+      }
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const result = await response.json();
+      
+      // Check if response has content before parsing JSON
+      const text = await response.text();
+      if (!text.trim()) {
+        throw new Error('Empty response received');
+      }
+      
+      const result = JSON.parse(text);
       setData(result);
       setError(null);
       setLastFetchTime(Date.now());
       return result;
     } catch (err) {
-      console.error('Error fetching data:', err);
+      console.error('Failed to fetch data:', err);
       setError(err as Error);
       return null;
     } finally {
-      setLoading(false);
+      if (!isRefresh) {
+        setLoading(false);
+      }
     }
   }, [url]);
 
@@ -40,7 +51,7 @@ export const useThrottledFetch = <T,>(
       const timeToNextFetch = Math.max(0, minInterval + jitter - timeSinceLastFetch);
       
       timeoutId = setTimeout(() => {
-        fetchData().finally(() => {
+        fetchData(true).finally(() => {
           scheduleNextFetch();
         });
       }, timeToNextFetch);

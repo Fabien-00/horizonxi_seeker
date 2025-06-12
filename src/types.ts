@@ -13,13 +13,25 @@ export type JobType = 'any' | 'tank' | 'healer' | 'dps' | 'support';
 
 // Define the structure for player data
 export interface PlayerData {
-  id: string; // Unique identifier for the player
-  name: string;
-  job: Job;
-  level: number;
+  charid?: number; // Added charid as it's used in App.tsx
+  charname: string;
+  avatar?: string; // Made optional as it's handled in App.tsx
+  nation?: string; // Assuming these might be optional from API
+  rank?: number;
+  mjob: string; // Keep as Job, will be cast in App.tsx
+  mlvl: number;
+  sjob: string; // Keep as Job, will be cast in App.tsx
+  slvl: number;
+  jobs?: any; // Assuming optional
+  seacomType?: number;
+  seacomMessage?: string | null;
+  timestamp?: string;
+  id?: string; // Unique identifier for the player
+  name?: string;
+  job?: Job;
+  level?: number;
   partyId?: string; // Optional: if the player is in a party
   comment?: string; // Optional: player's comment or LFP message
-  timestamp: number; // Timestamp of the last update or when player was seen
   jobType?: JobType; // Role based on job, can be derived or set
   flag?: string; // Player's flag/nation
   zone?: string; // Player's current zone
@@ -28,10 +40,12 @@ export interface PlayerData {
 // Define the structure for filter options
 export interface FilterOptions {
   searchTerm: string;
+  mainJob: Job | null; // Added mainJob
+  subJob: Job | null;  // Added subJob, made it non-optional based on usage
+  minLevel: number | ''; // Allow empty string for 'Any'
+  maxLevel: number | ''; // Allow empty string for 'Any'
   job: Job | ''; // Allow empty string for 'any job'
-  minLevel: number;
-  maxLevel: number;
-  jobType: JobType;
+  jobType: 'main' | 'sub' | 'any';
   alertEnabled: boolean;
   // Potentially add other filters like flag, zone, etc.
 }
