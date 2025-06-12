@@ -2,52 +2,66 @@ export type JobLevels = {
   [key: string]: number;
 };
 
-export interface Player {
+export interface PlayerData { // Renamed from Player to PlayerData to match usage in App.tsx as raw API data
+  charid?: number; // Added charid as it's used in App.tsx
   charname: string;
-  avatar: string;
-  nation: string;
-  rank: number;
-  mjob: string;
+  avatar?: string; // Made optional as it's handled in App.tsx
+  nation?: string; // Assuming these might be optional from API
+  rank?: number;
+  mjob: string; // Keep as Job, will be cast in App.tsx
   mlvl: number;
-  sjob: string;
+  sjob: string; // Keep as Job, will be cast in App.tsx
   slvl: number;
-  jobs: JobLevels;
-  seacomType: number;
-  seacomMessage: string | null;
-  timestamp: string;
+  jobs?: JobLevels; // Assuming optional
+  seacomType?: number;
+  seacomMessage?: string | null;
+  timestamp?: string;
+  // party?: any; // Removed as per previous cleanup, if it exists in API, define structure
 }
 
-export interface PlayerRow extends Player {
-  id: string;
-  otherJobs: string[];
-  isNew: boolean;
+export interface PlayerRow {
+  charid: number; // Ensured charid is present
+  avatar: string;
+  charname: string;
+  mjob: Job;
+  mlvl: number;
+  sjob: Job;
+  slvl: number;
+  comment: string | null;
+  seacomType?: number;
+  seacomMessage?: string | null;
+  // otherJobs: string[]; // This was in previous PlayerRow, review if needed
+  // isNew: boolean; // This was in previous PlayerRow, review if needed
 }
 
 export type JobType = 'main' | 'sub' | 'any';
 
 export interface FilterOptions {
-  job: string;
-  jobType: JobType;
-  minLevel: number;
-  maxLevel: number;
   searchTerm: string;
+  mainJob: Job | null; // Added mainJob
+  subJob: Job | null;  // Added subJob, made it non-optional based on usage
+  minLevel: number | ''; // Allow empty string for 'Any'
+  maxLevel: number | ''; // Allow empty string for 'Any'
   alertEnabled: boolean;
+  // hideFullParties: boolean; // Removed as per user request
 }
 
 export interface ApiResponse {
   total: number;
-  chars: Player[];
+  chars: PlayerData[];
 }
 
-export const JOB_ABBREVIATIONS = [
-  'WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK',
-  'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU',
-  'COR', 'PUP', 'DNC', 'SCH', 'GEO', 'RUN'
-] as const;
+export type Job = 
+  | 'WAR' | 'MNK' | 'WHM' | 'BLM' | 'RDM' | 'THF' | 'PLD' | 'DRK' | 'BST' | 'BRD' | 'RNG' 
+  | 'SAM' | 'NIN' | 'DRG' | 'SMN'; // Removed BLU, COR, PUP, DNC, RUN, GEO, MON for HorizonXI
 
-export type JobAbbreviation = typeof JOB_ABBREVIATIONS[number];
+export const JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN'];
 
-export const JOB_COLORS: Record<JobAbbreviation, string> = {
+export const HORIZON_JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN'];
+
+export type JobAbbreviation = typeof HORIZON_JOB_ABBREVIATIONS[number];
+
+export const JOB_COLORS: Record<JobAbbreviation | string, string> = { // Allow string for flexibility if new jobs are added dynamically
   'WAR': '#c79c6e', 'MNK': '#f4c030', 'WHM': '#f9da9d', 'BLM': '#a330c9',
   'RDM': '#f58cba', 'THF': '#f5e05e', 'PLD': '#c5e0fa', 'DRK': '#c41f3b',
   'BST': '#a9d0ac', 'BRD': '#ff7de3', 'RNG': '#abd473', 'SAM': '#e6b800',

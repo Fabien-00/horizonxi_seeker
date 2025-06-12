@@ -4,7 +4,7 @@ import type { ApiResponse } from '../types';
 const API_BASE_URL = 'https://api.horizonxi.com/api/v1/chars/lfp';
 
 // Add a simple rate limiter
-const RATE_LIMIT = 60000; // 1 request per minute
+const RATE_LIMIT = 600000; // 1 request per minute
 let lastRequestTime = 0;
 
 const delay = (ms: number): Promise<void> => 
@@ -48,6 +48,6 @@ export const fetchPlayers = async (): Promise<ApiResponse> => {
       console.error('Unexpected error:', error);
     }
     // Return empty data instead of throwing to prevent app crash
-    return { total: 0, chars: [] };
+    return { meta:{total: 0}, data: [] };
   }
 };

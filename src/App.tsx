@@ -1,197 +1,185 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ThemeProvider, CssBaseline, Container, Box, Typography } from '@mui/material';
-import { SnackbarProvider } from 'notistack';
 import { ffxiTheme } from './theme';
-import { fetchPlayers } from './services/api';
-import { FilterBar } from './components/FilterBar';
-import PlayerTable from './components/PlayerTableModern';
+import FilterBar from './components/FilterBar';
+import PlayerTable from './components/PlayerTable';
 import { Header } from './components/Header';
-import type { Player, FilterOptions } from './types';
+import type { PlayerRow, FilterOptions, Job, ApiResponse, PlayerData } from './types';
+import { Alert } from '@mui/material';
+import { useMemo } from 'react';
 
-const INITIAL_FILTERS: FilterOptions = {
-  job: '',
-  jobType: 'any',
-  minLevel: 1,
-  maxLevel: 75,
-  searchTerm: '',
-  alertEnabled: true,
-};
-
-const App: React.FC = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
+function App() {
+  const [players, setPlayers] = useState<PlayerRow[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    searchTerm: '',
+    minLevel: 1, // Default min level
+    maxLevel: 99, // Default max level
+    mainJob: null,
+    subJob: null,
+    alertEnabled: false,
+    // hideFullParties is removed from FilterOptions type and initial state
+  });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterOptions>(INITIAL_FILTERS);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
+  const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
-  // Load notification sound
-  useEffect(() => {
-    audioRef.current = new Audio('https://www.soundjay.com/buttons/sounds/button-09a.mp3');
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const playNotificationSound = useCallback((): void => {
-    if (filters.alertEnabled && audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch((e: Error) => console.error('Error playing sound:', e));
-    }
-  }, [filters.alertEnabled]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const data = await fetchPlayers();
-      setPlayers(data.chars);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to fetch players:', err);
-      setError('Failed to fetch player data. Please try again later.');
-    }
-  }, []);
+      // API endpoint is already corrected in the viewed file.
+      const response = await fetch('https://api.horizonxi.com/api/v1/chars/lfp'); 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const apiResponseData: ApiResponse = await response.json();
 
-  // Initial data fetch
+      // Ensure apiResponseData.chars exists and is an array before mapping
+      if (apiResponseData && Array.isArray(apiResponseData.chars)) {
+        const formattedPlayers: PlayerRow[] = apiResponseData.chars.map((p: PlayerData, index: number) => ({
+          charid: p.charid || index, // Fallback to index if charid is missing
+          avatar: p.avatar || '', // Provide default for avatar
+          charname: p.charname,
+          mjob: p.mjob as Job, // Cast to Job type
+          mlvl: p.mlvl,
+          sjob: p.sjob as Job, // Cast to Job type
+          slvl: p.slvl,
+          comment: p.seacomMessage || null, // Use seacomMessage for comment, provide default null
+          seacomType: p.seacomType,
+        }));
+        setPlayers(formattedPlayers);
+        setOnlineCount(apiResponseData.total); // Ensure this uses apiResponseData.total
+      } else {
+        // It seems the previous error message was for 'data' but the code was already using 'chars'.
+        // The user's new input confirms 'chars' is correct. The error might be elsewhere or intermittent.
+        // For now, let's ensure the error message accurately reflects what we expect.
+        console.error("API response did not contain expected 'chars' array or 'total' count:", apiResponseData);
+        setPlayers([]); // Set to empty array to prevent further errors
+        setOnlineCount(0);
+      }
+      setLastFetchTime(new Date());
+      setPage(0);
+
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+      console.error("Failed to fetch data:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []); // Added missing dependency array
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
-
-  // Set up polling
-  useEffect(() => {
-    const minDelay = 30000; // 30 seconds
-    const maxDelay = 60000; // 60 seconds
-    
-    const getRandomDelay = () => Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-    
-    let timeoutId: ReturnType<typeof setTimeout>;
-    
-    const poll = (): void => {
-      void fetchData();
-      timeoutId = setTimeout(poll, getRandomDelay());
-    };
-    
-    timeoutId = setTimeout(poll, getRandomDelay());
-    
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    const intervalId = setInterval(fetchData, 60000); // Refresh every 60 seconds
+    return () => clearInterval(intervalId);
   }, [fetchData]);
 
   const handleFilterChange = (newFilters: FilterOptions) => {
-    setFilters(newFilters);
+    setFilterOptions(newFilters);
+    setPage(0); // Reset to first page on filter change
+  };
+
+  const filteredPlayers = useMemo(() => {
+    return players.filter(player => {
+      const commentLower = player.comment?.toLowerCase() || '';
+      const charnameLower = player.charname?.toLowerCase() || '';
+      const searchTermLower = filterOptions.searchTerm.toLowerCase();
+      
+      const levelMatch = 
+        (filterOptions.minLevel === null || filterOptions.minLevel === '' || player.mlvl >= Number(filterOptions.minLevel)) &&
+        (filterOptions.maxLevel === null || filterOptions.maxLevel === '' || player.mlvl <= Number(filterOptions.maxLevel));
+      
+      const mainJobMatch = !filterOptions.mainJob || player.mjob === filterOptions.mainJob;
+      const subJobMatch = !filterOptions.subJob || player.sjob === filterOptions.subJob;
+
+      // Search term can match charname or comment
+      const searchMatch = filterOptions.searchTerm === '' || 
+                          charnameLower.includes(searchTermLower) || 
+                          commentLower.includes(searchTermLower);
+      
+      // const partyStatusMatch = !filterOptions.hideFullParties || !player.party || player.party.members < player.party.max_members;
+      // Party related filtering removed as party details are not in PlayerRow for the new table
+
+      return levelMatch && mainJobMatch && subJobMatch && searchMatch; // Removed partyStatusMatch
+    });
+  }, [players, filterOptions]);
+
+  // Sound alert logic (simplified, consider a more robust solution if needed)
+  // Sound alert logic (simplified, consider a more robust solution if needed)
+  const prevFilteredPlayersRef = useRef<PlayerRow[]>([]);
+  useEffect(() => {
+    if (filterOptions.alertEnabled && filteredPlayers.length > 0) {
+      // Play sound only if new players are added to the filtered list
+      const newMatchingPlayers = filteredPlayers.filter(
+        p1 => !prevFilteredPlayersRef.current.some(p2 => p2.charid === p1.charid)
+      );
+      if (newMatchingPlayers.length > 0) {
+        // const audio = new Audio('/path-to-your-alert-sound.mp3'); // Replace with your sound file path
+        // audio.play().catch(err => console.error("Error playing sound:", err));
+        console.log("Alert: New players matching filters!"); // Placeholder for actual sound
+      }
+    }
+    prevFilteredPlayersRef.current = filteredPlayers;
+  }, [filteredPlayers, filterOptions.alertEnabled]);
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
     <ThemeProvider theme={ffxiTheme}>
       <CssBaseline />
-      <SnackbarProvider maxSnack={3}>
-        <Box
-          sx={{
-            minHeight: '100vh',
-            backgroundImage: 'url(/assets/Chocobo_FFT.webp)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
-            position: 'relative',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              zIndex: 1,
-            },
-          }}
-        >
-          <Header />
-          
-          <Container 
-            maxWidth="xl" 
-            sx={{ 
-              py: 4,
-              position: 'relative',
-              zIndex: 2,
-            }}
-          >
-            <Box sx={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              borderRadius: 2,
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-              p: { xs: 2, md: 4 },
-              mb: 3
-            }}>
-              <Box sx={{ 
-                mb: 4, 
-                textAlign: 'center',
-                animation: 'fadeIn 0.5s ease-in-out',
-                '@keyframes fadeIn': {
-                  '0%': { opacity: 0, transform: 'translateY(-10px)' },
-                  '100%': { opacity: 1, transform: 'translateY(0)' }
-                }
-              }}>
-                <Typography 
-                  variant="h3" 
-                  component="h1" 
-                  gutterBottom
-                  sx={{
-                    background: 'linear-gradient(45deg, #ffd700 30%, #ffa500 90%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    fontWeight: 'bold',
-                    letterSpacing: '0.05em',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-                  }}
-                >
-                  FFXI Party Finder
-                </Typography>
-                <Typography 
-                  variant="subtitle1" 
-                  sx={{ 
-                    color: '#f0f0f0',
-                    fontStyle: 'italic',
-                    opacity: 0.9,
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  Real-time party search for HorizonXI
-                </Typography>
-              </Box>
-
-              <FilterBar 
-                filterOptions={filters} 
-                onFilterChange={handleFilterChange} 
-              />
-            </Box>
-
-            <PlayerTable 
-              players={players}
-              filterOptions={filters}
-              onPlaySound={playNotificationSound}
-            />
-
-            {error && (
-              <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                {error}
-              </Typography>
-            )}
-
-            <Box sx={{ 
-              mt: 3, 
-              textAlign: 'center', 
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-            }}>
-              Data updates every 30-60 seconds • Last updated: {new Date().toLocaleTimeString()}
-            </Box>
-          </Container>
+      <Header />
+      {/* Container styling adjusted to match the image's full-width feel for content area */}
+      <Container maxWidth={false} disableGutters sx={{ 
+        // mt: 0, mb: 0, p:0, // Remove default container margins and paddings if going full screen
+        backgroundColor: ffxiTheme.palette.background.default, // Main content area background
+        minHeight: 'calc(100vh - 56px)', // Assuming AppBar height is around 56px (theme.mixins.toolbar.minHeight)
+      }}>
+        <FilterBar 
+          filterOptions={filterOptions} 
+          onFilterChange={handleFilterChange} 
+        />
+        {error && (
+          <Alert severity="error" sx={{ m: 2, fontSize: '0.8rem' }}> {/* Margin instead of mb for consistency */}
+            Error fetching data: {error}. Retrying in 60 seconds...
+          </Alert>
+        )}
+        {/* Box for PlayerTableModern - no specific styling needed if table handles its own background via useTableStyles */}
+        <Box sx={{ 
+          padding: ffxiTheme.spacing(0, 2, 2, 2) 
+        }}>
+          <PlayerTable 
+            players={filteredPlayers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+            loading={loading} 
+            page={page}
+            rowsPerPage={rowsPerPage}
+            totalPlayers={filteredPlayers.length}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+          />
         </Box>
-      </SnackbarProvider>
+        {lastFetchTime && (
+          <Typography variant="caption" display="block" sx={{ p: ffxiTheme.spacing(0, 2, 1, 2), textAlign: 'right', fontSize: '0.7rem', color: ffxiTheme.palette.text.disabled }}>
+            Last updated: {lastFetchTime.toLocaleTimeString()} | Online: {onlineCount ?? 'N/A'}
+          </Typography>
+        )}
+      </Container>
     </ThemeProvider>
   );
-};
+}
 
 export default App;

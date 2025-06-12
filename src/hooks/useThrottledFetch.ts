@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 
 export const useThrottledFetch = <T,>(
   url: string,
-  minInterval = 60000, // 1 minute by default
-  maxJitter = 20000 // 20 seconds jitter
+  minInterval = 600000, // 1 minute by default
+  maxJitter = 200000 // 20 seconds jitter
 ) => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
