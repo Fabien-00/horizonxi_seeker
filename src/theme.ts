@@ -55,11 +55,13 @@ export const ffxiTheme = createTheme({
       fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
       fontWeight: 400,
       letterSpacing: '0.15px',
+      fontSize: '0.9rem', // Reduced font size
     },
     body2: {
       fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',
       fontWeight: 400,
       letterSpacing: '0.25px',
+      fontSize: '0.8rem', // Reduced font size
     },
     button: {
       fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif',

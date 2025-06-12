@@ -120,6 +120,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
               >
                 Sub Lvl {sortBy === 'slvl' && (sortOrder === 'asc' ? '↑' : '↓')}
               </TableCell>
+              <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Other Jobs</TableCell>
               <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Seacom Type</TableCell>
               <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Seacom Message</TableCell>
             </TableRow>
@@ -127,7 +128,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} sx={{ // Adjusted colSpan from 8 to 7 after removing Avatar
+                <TableCell colSpan={8} sx={{ // Adjusted colSpan to 8 to account for new 'Other Jobs' column
                   textAlign: 'center',
                   padding: theme.spacing(3),
                   color: theme.palette.text.secondary,
@@ -141,7 +142,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
               </TableRow>
             ) : players.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} sx={{ // Adjusted colSpan from 8 to 7 after removing Avatar
+                <TableCell colSpan={8} sx={{ // Adjusted colSpan to 8 to account for new 'Other Jobs' column
                   textAlign: 'center',
                   padding: theme.spacing(3),
                   color: theme.palette.text.secondary,
@@ -196,24 +197,24 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                       label={player.mjob} 
                       size="small"
                       sx={{ 
-                        background: `linear-gradient(135deg, ${JOB_COLORS[player.mjob as Job] || '#2E4A78'}, ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}cc` : '#243447'})`,
-                        color: '#E8F4FD',
+                        background: `linear-gradient(135deg, ${JOB_COLORS[player.mjob as Job] || theme.palette.grey[700]}, ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}b3` : theme.palette.grey[800]})`,
+                        color: theme.palette.common.white, // Explicitly set light text color
                         fontWeight: 600,
                         fontSize: '0.75rem',
                         letterSpacing: '0.5px',
-                        textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
-                        border: `1px solid ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}88` : '#334155'}`,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.7)',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+                        border: `1px solid ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}99` : theme.palette.grey[600]}`, 
                         borderRadius: '3px',
                         minWidth: '40px',
                         height: '26px',
                         transition: 'all 0.2s ease',
-                        backdropFilter: 'blur(4px)',
+                        backdropFilter: 'blur(3px)',
                         cursor: 'pointer',
                         '&:hover': {
                           transform: 'translateY(-1px) scale(1.02)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                          border: `1px solid #D4AF37`,
+                          boxShadow: '0 3px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
+                          border: `1px solid ${JOB_COLORS[player.mjob as Job] || theme.palette.grey[500]}`,
                           cursor: 'pointer',
                         }
                       }}
@@ -226,24 +227,24 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                         label={player.sjob} 
                         size="small"
                         sx={{ 
-                          background: `linear-gradient(135deg, ${JOB_COLORS[player.sjob as Job] || '#2E4A78'}, ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}cc` : '#243447'})`,
-                          color: '#E8F4FD',
+                          background: `linear-gradient(135deg, ${JOB_COLORS[player.sjob as Job] || theme.palette.grey[700]}, ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}b3` : theme.palette.grey[800]})`,
+                          color: theme.palette.common.white, // Explicitly set light text color
                           fontWeight: 600,
                           fontSize: '0.75rem',
                           letterSpacing: '0.5px',
-                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
-                          border: `1px solid ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}88` : '#334155'}`,
+                          textShadow: '0 1px 2px rgba(0,0,0,0.7)',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+                          border: `1px solid ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}99` : theme.palette.grey[600]}`, 
                           borderRadius: '3px',
                           minWidth: '40px',
                           height: '26px',
                           transition: 'all 0.2s ease',
-                          backdropFilter: 'blur(4px)',
+                          backdropFilter: 'blur(3px)',
                           cursor: 'pointer',
                           '&:hover': {
                             transform: 'translateY(-1px) scale(1.02)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                            border: `1px solid #D4AF37`,
+                            boxShadow: '0 3px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
+                            border: `1px solid ${JOB_COLORS[player.sjob as Job] || theme.palette.grey[500]}`,
                             cursor: 'pointer',
                           }
                         }}
@@ -253,8 +254,39 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                     )}
                   </TableCell>
                   <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>{player.slvl}</TableCell>
+                  <TableCell sx={{ color: theme.palette.text.primary, borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1, 1.5) }}>
+                    {player.jobs && Object.entries(player.jobs).map(([job, level]) => (
+                      <Chip 
+                        key={job} 
+                        label={`${job.toUpperCase()} ${level}`} 
+                        size="small" 
+                          sx={{
+                            mr: 0.5, 
+                            mb: 0.5, 
+                            background: `linear-gradient(135deg, ${JOB_COLORS[job.toUpperCase() as Job] || '#4A5568'}, ${JOB_COLORS[job.toUpperCase() as Job] ? `${JOB_COLORS[job.toUpperCase() as Job]}cc` : '#2D3748'})`,
+                            color: '#E2E8F0',
+                            fontWeight: 500,
+                            fontSize: '0.7rem',
+                            letterSpacing: '0.3px',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+                            border: `1px solid ${JOB_COLORS[job.toUpperCase() as Job] ? `${JOB_COLORS[job.toUpperCase() as Job]}66` : '#4A5568'}`, 
+                            borderRadius: '3px',
+                            minWidth: '35px',
+                            height: '22px',
+                            padding: '0 6px',
+                            transition: 'all 0.15s ease',
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                              border: `1px solid ${JOB_COLORS[job.toUpperCase() as Job] || '#A0AEC0'}`, 
+                            }
+                          }} 
+                      />
+                    ))}
+                  </TableCell>
                   <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>{mapSeacomType(player.seacomType)}</TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>{player.seacomMessage || '-'}</TableCell>
+                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1), whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '300px' }}>{player.seacomMessage || '-'}</TableCell>
                 </TableRow>
               ))
             )}

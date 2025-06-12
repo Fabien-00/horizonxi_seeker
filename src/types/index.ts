@@ -27,22 +27,22 @@ export interface PlayerRow {
   mlvl: number;
   sjob: Job;
   slvl: number;
-  comment: string | null;
+  // comment: string | null; // seacomMessage will be used directly
   seacomType?: number;
   seacomMessage?: string | null;
+  jobs?: JobLevels;
   isNew?: boolean; // Added for new player highlighting
-  // otherJobs: string[]; // This was in previous PlayerRow, review if needed
 }
 
 export type JobType = 'main' | 'sub' | 'any';
 
 export interface FilterOptions {
   searchTerm: string;
-  mainJob: Job | null; // Added mainJob
-  subJob: Job | null;  // Added subJob, made it non-optional based on usage
+  mainJobs: Job[]; // Changed to array for multiple selections, renamed for clarity
+  subJobs: Job[];  // Changed to array for multiple selections, renamed for clarity
   minLevel: number | ''; // Allow empty string for 'Any'
   maxLevel: number | ''; // Allow empty string for 'Any'
-  job: Job | ''; // Allow empty string for 'any job'
+  selectedJobs: Job[]; // Changed to array for multiple selections, renamed for clarity
   jobType: 'main' | 'sub' | 'any';
   alertEnabled: boolean;
   // hideFullParties: boolean; // Removed as per user request
@@ -64,12 +64,12 @@ export const HORIZON_JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RD
 export type JobAbbreviation = typeof HORIZON_JOB_ABBREVIATIONS[number];
 
 export const JOB_COLORS: Record<JobAbbreviation | string, string> = { 
-  'WAR': '#c79c6e', 'MNK': '#f4c030', 'WHM': '#f9da9d', 'BLM': '#a330c9',
-  'RDM': '#f58cba', 'THF': '#f5e05e', 'PLD': '#c5e0fa', 'DRK': '#c41f3b',
-  'BST': '#a9d0ac', 'BRD': '#ff7de3', 'RNG': '#abd473', 'SAM': '#e6b800',
-  'NIN': '#9b59b6', 'DRG': '#7b9cf0', 'SMN': '#2ecc71', 'BLU': '#3498db',
-  'COR': '#e67e22', 'PUP': '#8e8e8e', 'DNC': '#e74c3c', 'SCH': '#1abc9c',
-  'GEO': '#9b59b6', 'RUN': '#3498db'
+  'WAR': '#b08968', 'MNK': '#d8a82a', 'WHM': '#e0c28c', 'BLM': '#8f2ab0',
+  'RDM': '#da7aac', 'THF': '#d9c653', 'PLD': '#adcdea', 'DRK': '#ad1b34',
+  'BST': '#95b998', 'BRD': '#e66fd0', 'RNG': '#97bd66', 'SAM': '#cca300',
+  'NIN': '#874f9f', 'DRG': '#6c89d6', 'SMN': '#28b463', 'BLU': '#2e86c1',
+  'COR': '#cc6d1e', 'PUP': '#7a7a7a', 'DNC': '#ce4335', 'SCH': '#17a589',
+  'GEO': '#874f9f', 'RUN': '#2e86c1', 'MON': '#8c4827'
 } as const;
 
 export const NATION_COLORS = {

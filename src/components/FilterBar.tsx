@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Paper, TextField, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, IconButton, Badge, Box } from '@mui/material';
+import { Paper, TextField, Button, Typography, Autocomplete, IconButton, Badge } from '@mui/material';
 import { NotificationsActive, NotificationsOff } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { type FilterOptions, type Job } from '../types/index';
@@ -22,59 +22,11 @@ const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) =
   return debounced as (...args: Parameters<F>) => ReturnType<F>;
 };
 
-const JobSelectionDialog: React.FC<{ open: boolean; onClose: () => void; onApply: (jobs: { mainJob: Job | null; subJob: Job | null }) => void; mainJob: Job | null; subJob: Job | null; }> = ({ open, onClose, onApply, mainJob, subJob }) => {
-  const [selectedMainJob, setSelectedMainJob] = useState<Job | null>(mainJob);
-  const [selectedSubJob, setSelectedSubJob] = useState<Job | null>(subJob);
 
-  useEffect(() => {
-    setSelectedMainJob(mainJob);
-    setSelectedSubJob(subJob);
-  }, [open, mainJob, subJob]);
-
-  const handleApply = () => {
-    onApply({ mainJob: selectedMainJob, subJob: selectedSubJob });
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Select Jobs</DialogTitle>
-      <DialogContent>
-        <Box sx={{ mt: 1 }}>
-          <Autocomplete
-            options={HORIZON_JOB_ABBREVIATIONS as Job[]}
-            getOptionLabel={(option) => option}
-            value={selectedMainJob}
-            onChange={(_event, newValue) => {
-              setSelectedMainJob(newValue as Job | null);
-            }}
-            renderInput={(params) => <TextField {...params} label="Main Job" variant="outlined" />}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <Autocomplete
-            options={HORIZON_JOB_ABBREVIATIONS as Job[]}
-            getOptionLabel={(option) => option}
-            value={selectedSubJob}
-            onChange={(_event, newValue) => {
-              setSelectedSubJob(newValue as Job | null);
-            }}
-            renderInput={(params) => <TextField {...params} label="Sub Job" variant="outlined" />}
-            fullWidth
-          />
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleApply} variant="contained">Apply</Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
 
 const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) => {
   const theme = useTheme();
   const [localFilters, setLocalFilters] = useState<FilterOptions>(filterOptions);
-  const [openJobDialog, setOpenJobDialog] = useState(false);
 
   const debouncedFilterChange = useMemo(
     () => debounce((filters: FilterOptions) => onFilterChange(filters), 300),
@@ -103,15 +55,24 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
     debouncedFilterChange(newFilters);
   };
 
-  const handleJobChange = (selectedJobs: { mainJob: Job | null; subJob: Job | null }) => {
+  const handleMainJobChange = (selectedMainJobs: Job[]) => {
     const newFilters = {
       ...localFilters,
-      mainJob: selectedJobs.mainJob,
-      subJob: selectedJobs.subJob,
-    };
+      mainJobs: selectedMainJobs,
+      selectedJobs: [], // Clear generic selectedJobs when specific main jobs are chosen
+    } as FilterOptions;
     setLocalFilters(newFilters);
     debouncedFilterChange(newFilters);
-    setOpenJobDialog(false); // Close dialog on apply
+  };
+
+  const handleSubJobChange = (selectedSubJobs: Job[]) => {
+    const newFilters = {
+      ...localFilters,
+      subJobs: selectedSubJobs,
+      selectedJobs: [], // Clear generic selectedJobs when specific sub jobs are chosen
+    } as FilterOptions;
+    setLocalFilters(newFilters);
+    debouncedFilterChange(newFilters);
   };
 
   return (
@@ -140,21 +101,52 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
         FILTERS:
       </Typography>
 
-      <Button 
-        variant="outlined"
-        onClick={() => setOpenJobDialog(true)} 
+      <Autocomplete
+        multiple
+        disableCloseOnSelect
+        options={HORIZON_JOB_ABBREVIATIONS as Job[]}
+        getOptionLabel={(option) => option}
+        value={localFilters.mainJobs}
+        onChange={(_event, newValue) => {
+          handleMainJobChange(newValue as Job[]);
+        }}
+        renderInput={(params) => <TextField {...params} label="Main Job(s)" variant="outlined" />}
         size="small"
-      >
-        {(localFilters as any).mainJob || (localFilters as any).subJob ?
-          `Jobs: ${(localFilters as FilterOptions & { mainJob: Job | null }).mainJob || 'Any'} / ${(localFilters as FilterOptions & { subJob: Job | null }).subJob || 'Any'}` :
-          'Select Jobs'}
-      </Button>
-      <JobSelectionDialog
-        open={openJobDialog}
-        onClose={() => setOpenJobDialog(false)}
-        mainJob={(localFilters as FilterOptions & { mainJob: Job | null }).mainJob}
-        subJob={(localFilters as FilterOptions & { subJob: Job | null }).subJob}
-        onApply={handleJobChange}
+        sx={{ width: 200 }}
+        ChipProps={{
+          size: 'small',
+          sx: {
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[500],
+            color: theme.palette.getContrastText(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[500]),
+            '& .MuiChip-deleteIcon': {
+              color: theme.palette.getContrastText(theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[500]),
+            },
+          }
+        }}
+      />
+
+      <Autocomplete
+        multiple
+        disableCloseOnSelect
+        options={HORIZON_JOB_ABBREVIATIONS as Job[]}
+        getOptionLabel={(option) => option}
+        value={localFilters.subJobs}
+        onChange={(_event, newValue) => {
+          handleSubJobChange(newValue as Job[]);
+        }}
+        renderInput={(params) => <TextField {...params} label="Sub Job(s)" variant="outlined" />}
+        size="small"
+        sx={{ width: 200 }}
+        ChipProps={{
+          size: 'small',
+          sx: {
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[400],
+            color: theme.palette.getContrastText(theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[400]),
+            '& .MuiChip-deleteIcon': {
+              color: theme.palette.getContrastText(theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[400]),
+            },
+          }
+        }}
       />
 
       <TextField
@@ -199,11 +191,11 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
         onClick={() => {
           const resetFilters = {
           searchTerm: '',
-          mainJob: null,
-          subJob: null,
+          mainJobs: [],
+          subJobs: [],
           minLevel: 1 as number | '',
           maxLevel: 75 as number | '',
-          job: '' as Job | '',
+          selectedJobs: [],
           jobType: 'any' as const,
           alertEnabled: false,
         };

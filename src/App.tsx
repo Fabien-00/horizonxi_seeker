@@ -12,14 +12,13 @@ function App() {
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     searchTerm: '',
-    mainJob: null,
-    subJob: null,
+    mainJobs: [],
+    subJobs: [],
     minLevel: 1 as number | '', // Default min level
     maxLevel: 75 as number | '', // Default max level
-    job: '' as Job | '',
+    selectedJobs: [],
     jobType: 'any',
     alertEnabled: false,
-    // hideFullParties is removed from FilterOptions type and initial state
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +32,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
   const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(new Map());
+  const [isAutoRefreshPaused, setIsAutoRefreshPaused] = useState<boolean>(false);
 
   const fetchData = useCallback(async (isRefresh = false) => {
     // Only show loading spinner on initial load, not on refresh
@@ -70,8 +70,9 @@ function App() {
           mlvl: p.mlvl,
           sjob: p.sjob as Job, // Cast to Job type
           slvl: p.slvl,
-          comment: p.seacomMessage || null, // Use seacomMessage for comment, provide default null
+          seacomMessage: p.seacomMessage || null,
           seacomType: p.seacomType,
+          jobs: p.jobs,
         }));
         setPlayers(formattedPlayers);
       } else {
@@ -130,6 +131,10 @@ function App() {
     fetchData(); // Initial load
     
     const scheduleNextRefresh = () => {
+      if (isAutoRefreshPaused) {
+        setRefreshCountdown(0);
+        return null;
+      }
       // Random interval between 60-100 seconds (60 + 0-40 seconds)
       const randomDelay = 60000 + Math.random() * 40000;
       setRefreshCountdown(Math.ceil(randomDelay / 1000));
@@ -141,7 +146,9 @@ function App() {
     };
     
     const timeoutId = scheduleNextRefresh();
-    return () => clearTimeout(timeoutId);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [fetchData]);
 
   // Countdown timer effect
@@ -167,7 +174,7 @@ function App() {
 
   const filteredPlayers = useMemo(() => {
     return players.filter(player => {
-      const commentLower = player.comment?.toLowerCase() || '';
+      const commentLower = player.seacomMessage?.toLowerCase() || '';
       const charnameLower = player.charname?.toLowerCase() || '';
       const searchTermLower = filterOptions.searchTerm.toLowerCase();
       
@@ -175,8 +182,8 @@ function App() {
         (filterOptions.minLevel === null || filterOptions.minLevel === '' || player.mlvl >= Number(filterOptions.minLevel)) &&
         (filterOptions.maxLevel === null || filterOptions.maxLevel === '' || player.mlvl <= Number(filterOptions.maxLevel));
       
-      const mainJobMatch = !filterOptions.mainJob || player.mjob === filterOptions.mainJob;
-      const subJobMatch = !filterOptions.subJob || player.sjob === filterOptions.subJob;
+      const mainJobMatch = filterOptions.mainJobs.length === 0 || filterOptions.mainJobs.includes(player.mjob);
+      const subJobMatch = filterOptions.subJobs.length === 0 || filterOptions.subJobs.includes(player.sjob);
 
       // Search term can match charname or comment
       const searchMatch = filterOptions.searchTerm === '' || 
@@ -186,7 +193,7 @@ function App() {
       // const partyStatusMatch = !filterOptions.hideFullParties || !player.party || player.party.members < player.party.max_members;
       // Party related filtering removed as party details are not in PlayerRow for the new table
 
-      return levelMatch && mainJobMatch && subJobMatch && searchMatch; // Removed partyStatusMatch
+      return levelMatch && mainJobMatch && subJobMatch && searchMatch;
     });
   }, [players, filterOptions]);
 
@@ -383,10 +390,12 @@ function App() {
               {refreshCountdown > 0 && ` • Next refresh in: ${Math.floor(refreshCountdown / 60)}:${(refreshCountdown % 60).toString().padStart(2, '0')}`}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <button 
+              <button
                 onClick={() => {
-                  fetchData(true);
-                  setRefreshCountdown(0);
+                  if (!isAutoRefreshPaused) {
+                    fetchData(true);
+                    setRefreshCountdown(0);
+                  }
                 }}
                 style={{
                   background: 'linear-gradient(135deg, #1976d2, #1565c0)',
@@ -401,7 +410,34 @@ function App() {
                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                🔄 Refresh
+                {isAutoRefreshPaused ? '⏸️ Paused' : '🔄 Refresh'}
+              </button>
+              <button
+                onClick={() => {
+                  setIsAutoRefreshPaused(!isAutoRefreshPaused);
+                  if (isAutoRefreshPaused) {
+                    // Resume refresh cycle
+                    fetchData(true);
+                  } else {
+                    // Clear countdown when pausing
+                    setRefreshCountdown(0);
+                  }
+                }}
+                style={{
+                  background: isAutoRefreshPaused ? 'linear-gradient(135deg, #4caf50, #45a049)' : 'linear-gradient(135deg, #f44336, #e53935)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  marginLeft: '8px'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                {isAutoRefreshPaused ? '▶️ Resume' : '⏸️ Pause'}
               </button>
             </Box>
           </Box>

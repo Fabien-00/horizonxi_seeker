@@ -1,4 +1,6 @@
-import { AppBar, Toolbar, Typography, Box, styled, useTheme } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+
+import { useTheme, styled } from '@mui/material/styles';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   background: `linear-gradient(135deg, #243447 0%, #2E4A78 50%, #1A2332 100%)`,
@@ -32,18 +34,6 @@ const Logo = styled('img')(({ theme }) => ({
   },
 }));
 
-const Title = styled(Typography)(() => ({
-  background: 'linear-gradient(135deg, #E8F4FD 0%, #D4AF37 50%, #F4E4BC 100%)',
-  backgroundClip: 'text',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  fontWeight: 800,
-  letterSpacing: '1px',
-  fontSize: '1.8rem',
-  textShadow: '0 2px 10px rgba(212, 175, 55, 0.3)',
-  fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
-}));
-
 const Subtitle = styled(Typography)(({ theme }) => ({
   color: '#94A3B8',
   marginLeft: theme.spacing(2),
@@ -66,7 +56,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
 //   }
 // }));
 
-const Header: React.FC = () => {
+export const Header = () => {
   const theme = useTheme(); // theme is used in Toolbar's sx prop
 
   return (
@@ -86,9 +76,9 @@ const Header: React.FC = () => {
         }}>
           <Logo src="/chocobo.jpg" alt="HorizonXI Seeker Logo" />
           <Box>
-            <Title variant="h1">
-              HorizonXI Seeker
-            </Title>
+        <Typography variant="h4" component="h1" sx={{ flexGrow: 1, color: theme.palette.primary.contrastText, fontWeight: 'bold', letterSpacing: '0.05em' }}>
+          HorizonXI Seeker
+        </Typography>
             <Subtitle variant="body2">
               Fait par moi 
             </Subtitle>
@@ -100,5 +90,3 @@ const Header: React.FC = () => {
     </StyledAppBar>
   );
 };
-
-export { Header };
