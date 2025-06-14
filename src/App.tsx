@@ -24,7 +24,10 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   // const [newPlayerIds, setNewPlayerIds] = useState<Set<number>>(new Set()); // Removed, redundant
-  const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<number>>(new Set());
+  const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<number>>(() => {
+    const storedKnownPlayerCharIds = localStorage.getItem('knownPlayerCharIds');
+    return storedKnownPlayerCharIds ? new Set(JSON.parse(storedKnownPlayerCharIds)) : new Set();
+  });
 
 
   const [page, setPage] = useState(0);
@@ -32,8 +35,19 @@ function App() {
   const [sortBy, setSortBy] = useState<'mlvl' | 'slvl' | 'charname' | null>('mlvl');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
-  const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(new Map()); // Stores charid -> refresh_cycle_count (0 or 1)
+  const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(() => {
+    const storedNewPlayerRefreshCount = localStorage.getItem('newPlayerRefreshCount');
+    return storedNewPlayerRefreshCount ? new Map(JSON.parse(storedNewPlayerRefreshCount)) : new Map();
+  }); // Stores charid -> refresh_cycle_count (0 or 1)
   const [isAutoRefreshPaused, setIsAutoRefreshPaused] = useState<boolean>(false);
+
+  useEffect(() => {
+    localStorage.setItem('knownPlayerCharIds', JSON.stringify(Array.from(knownPlayerCharIds)));
+  }, [knownPlayerCharIds]);
+
+  useEffect(() => {
+    localStorage.setItem('newPlayerRefreshCount', JSON.stringify(Array.from(newPlayerRefreshCount.entries())));
+  }, [newPlayerRefreshCount]);
 
   const fetchData = useCallback(async (isRefresh = false) => {
     // Only show loading spinner on initial load, not on refresh
