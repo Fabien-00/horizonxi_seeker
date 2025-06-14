@@ -79,6 +79,8 @@ function App() {
       if (apiResponseData && Array.isArray(apiResponseData.chars)) {
         const currentKnownPlayerCharIds = new Set(knownPlayerCharIds);
         const updatedNewPlayerRefreshCount = new Map(newPlayerRefreshCount);
+        console.log('Initial knownPlayerCharIds:', new Set(knownPlayerCharIds));
+        console.log('Initial newPlayerRefreshCount:', new Map(newPlayerRefreshCount));
 
         // Step 1: Update refresh counts for players already marked as new and expire them if needed
         if (isRefresh) {
@@ -95,15 +97,20 @@ function App() {
         const formattedPlayers: PlayerRow[] = apiResponseData.chars.map((p: PlayerData, index: number) => {
           const charId = p.charid || index; // Use index as fallback, though charid should be reliable
           let isNewPlayer = false;
+          console.log(`Processing player ${p.charname} (ID: ${charId})`);
 
           if (!knownPlayerCharIds.has(charId)) {
             // This player is seen for the very first time
             isNewPlayer = true;
             currentKnownPlayerCharIds.add(charId); // Add to known IDs for next cycle
             updatedNewPlayerRefreshCount.set(charId, 0); // Start refresh count at 0
+            console.log(`Player ${p.charname} (ID: ${charId}) is NEW (first time seen). Setting refresh count to 0.`);
           } else if (updatedNewPlayerRefreshCount.has(charId)) {
             // This player was new in a previous cycle and is still within its "new" window
             isNewPlayer = true;
+            console.log(`Player ${p.charname} (ID: ${charId}) is NEW (still in window). Refresh count: ${updatedNewPlayerRefreshCount.get(charId)}`);
+          } else {
+            console.log(`Player ${p.charname} (ID: ${charId}) is NOT new.`);
           }
 
           return {
@@ -124,6 +131,8 @@ function App() {
         setPlayers(formattedPlayers);
         setKnownPlayerCharIds(currentKnownPlayerCharIds);
         setNewPlayerRefreshCount(updatedNewPlayerRefreshCount);
+        console.log('Updated knownPlayerCharIds:', currentKnownPlayerCharIds);
+        console.log('Updated newPlayerRefreshCount:', updatedNewPlayerRefreshCount);
 
       } else {
         console.error("API response did not contain expected 'chars' array or 'total' count:", apiResponseData);
@@ -142,7 +151,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, []); // Added missing dependency array
+  }, [knownPlayerCharIds, newPlayerRefreshCount]); // Added missing dependency array
 
   useEffect(() => {
     fetchData(); // Initial load
@@ -166,7 +175,7 @@ function App() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [fetchData]);
+  }, [isAutoRefreshPaused]);
 
   // Countdown timer effect
   useEffect(() => {
