@@ -41,6 +41,8 @@ function App() {
   }); // Stores charid -> refresh_cycle_count (0 or 1)
   const [isAutoRefreshPaused, setIsAutoRefreshPaused] = useState<boolean>(false);
 
+const fetchDataRef = useRef<typeof fetchData | null>(null);
+
   useEffect(() => {
     localStorage.setItem('knownPlayerCharIds', JSON.stringify(Array.from(knownPlayerCharIds)));
   }, [knownPlayerCharIds]);
@@ -154,7 +156,13 @@ function App() {
   }, [knownPlayerCharIds, newPlayerRefreshCount]); // Added missing dependency array
 
   useEffect(() => {
-    fetchData(); // Initial load
+    fetchDataRef.current = fetchData;
+  }, [fetchData]);
+
+  useEffect(() => {
+if (fetchDataRef.current) {
+  fetchDataRef.current(); // Initial load
+}
     
     const scheduleNextRefresh = () => {
       if (isAutoRefreshPaused) {
@@ -166,7 +174,9 @@ function App() {
       setRefreshCountdown(Math.ceil(randomDelay / 1000));
       
       return setTimeout(() => {
-        fetchData(true);
+if (fetchDataRef.current) {
+  fetchDataRef.current(true);
+}
         scheduleNextRefresh(); // Schedule the next refresh
       }, randomDelay);
     };
