@@ -236,9 +236,12 @@ if (fetchDataRef.current) {
   const prevFilteredPlayersRef = useRef<PlayerRow[]>([]);
   useEffect(() => {
     const previousFilteredIds = new Set(prevFilteredPlayersRef.current.map(p => p.charid));
-    const newlyAddedPlayers = filteredPlayers.filter(p => !previousFilteredIds.has(p.charid));
+    const newlyAddedToFilteredView = filteredPlayers.filter(p => !previousFilteredIds.has(p.charid));
 
-    if (filterOptions.alertEnabled && newlyAddedPlayers.length > 0) {
+    // Check if any of these newly added players are also marked as 'isNew'
+    const newPlayersMatchingFilters = newlyAddedToFilteredView.filter(p => p.isNew);
+
+    if (filterOptions.alertEnabled && newPlayersMatchingFilters.length > 0) {
       // Play FFXI-style ring notification sound
       try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -261,7 +264,7 @@ if (fetchDataRef.current) {
       } catch (err) {
         console.log('Audio notification not available:', err);
       }
-      console.log("Alert: New players matching filters!", newlyAddedPlayers.map(p => p.charname));
+      console.log("Alert: New players (isNew=true) matching filters!", newPlayersMatchingFilters.map(p => p.charname));
       
       // Update newPlayerRefreshCount for newly added players
       // The logic for setting isNew is now handled within fetchData
