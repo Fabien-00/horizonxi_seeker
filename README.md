@@ -6,3 +6,6 @@ https://horizonxi-seeker.onrender.com/
 
 
 Using React + TypeScript + Vite
+
+
+![screenshot](look.png)
