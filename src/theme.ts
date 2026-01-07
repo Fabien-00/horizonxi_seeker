@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles';
 
 // Removed Theme and ThemeOptions declarations for ffxiColors as it's not used.
 
-// HorizonXI Premium Dark Blue Theme
+// HorizonXI Premium Dark Blue Theme with FFXI Medieval Atmosphere
 const HORIZON_DEEP_BLUE = '#0A1628'; // Deep navy blue background
 const HORIZON_DARK_BLUE = '#1A2332'; // Dark blue for surfaces
 const HORIZON_MEDIUM_BLUE = '#243447'; // Medium blue for elevated surfaces
@@ -12,6 +12,7 @@ const HORIZON_LIGHT_GOLD = '#F4E4BC'; // Light gold for text highlights
 const HORIZON_TEXT_PRIMARY = '#E8F4FD'; // Light blue-white for primary text
 const HORIZON_TEXT_SECONDARY = '#94A3B8'; // Muted blue-grey for secondary text
 const HORIZON_BORDER = '#334155'; // Subtle blue-grey borders
+const FFXI_BRONZE = '#CD7F32'; // Medieval bronze accent
 
 export const ffxiTheme = createTheme({
   palette: {
@@ -176,6 +177,19 @@ export const ffxiTheme = createTheme({
           boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(212, 175, 55, 0.1)`,
           borderRadius: '12px',
           backdropFilter: 'blur(10px)',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%), 
+                        radial-gradient(circle at 80% 80%, rgba(46, 74, 120, 0.05) 0%, transparent 50%)`,
+            borderRadius: 'inherit',
+            pointerEvents: 'none',
+          },
         },
       },
     },
@@ -187,9 +201,10 @@ export const ffxiTheme = createTheme({
           '& .MuiTableCell-head': {
             color: HORIZON_TEXT_PRIMARY,
             fontWeight: 700,
-            fontSize: '0.95rem',
-            letterSpacing: '0.5px',
+            fontSize: '0.75rem', // Reduced from 0.95rem
+            letterSpacing: '0.2px', // Reduced from 0.5px
             textTransform: 'uppercase',
+            padding: '6px 12px', // Reduced padding
           },
         }
       }
@@ -200,16 +215,16 @@ export const ffxiTheme = createTheme({
           color: HORIZON_TEXT_PRIMARY,
           fontWeight: 700,
           textTransform: 'uppercase',
-          letterSpacing: '0.3px',
+          letterSpacing: '0.2px', // Reduced from 0.3px
           borderBottom: 'none',
-          padding: '12px 16px',
-          fontSize: '0.8rem',
+          padding: '6px 12px', // Reduced from 12px 16px
+          fontSize: '0.75rem', // Reduced from 0.8rem
         },
         body: {
           color: HORIZON_TEXT_PRIMARY,
           borderColor: HORIZON_BORDER,
-          padding: '8px 16px',
-          fontSize: '0.8rem',
+          padding: '4px 8px', // Reduced from 8px 16px
+          fontSize: '0.75rem', // Reduced from 0.8rem
           cursor: 'default',
           '&:hover': {
             backgroundColor: `rgba(212, 175, 55, 0.05)`,
@@ -292,9 +307,83 @@ export const ffxiTheme = createTheme({
         },
       },
     },
-    // Ensure react-data-table-component specific styles in PlayerTableModern.tsx
-    // are also updated or use these theme settings effectively.
-    // The DataTable component itself might need its `customStyles` prop adjusted
-    // if these Mui component overrides are not fully picked up by it.
+    MuiSlider: {
+      styleOverrides: {
+        root: {
+          color: HORIZON_GOLD,
+          height: 4,
+        },
+        thumb: {
+          width: 16,
+          height: 16,
+          backgroundColor: HORIZON_GOLD,
+          border: `2px solid ${HORIZON_DARK_BLUE}`,
+          '&:hover': {
+            boxShadow: `0 0 0 8px rgba(212, 175, 55, 0.16)`,
+          },
+          '&.Mui-focusVisible': {
+            boxShadow: `0 0 0 8px rgba(212, 175, 55, 0.16)`,
+          },
+        },
+        track: {
+          backgroundColor: HORIZON_GOLD,
+          border: 'none',
+        },
+        rail: {
+          backgroundColor: HORIZON_BORDER,
+        },
+        valueLabel: {
+          backgroundColor: HORIZON_GOLD,
+          color: HORIZON_DEEP_BLUE,
+          fontWeight: 600,
+          fontSize: '0.75rem',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: '6px',
+          fontWeight: 500,
+          transition: 'all 0.2s ease',
+          position: 'relative',
+          overflow: 'hidden',
+          '&:hover': {
+            transform: 'scale(1.02)',
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '100%',
+            background: `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)`,
+            transition: 'left 0.5s ease',
+          },
+          '&:hover::before': {
+            left: '100%',
+          },
+        },
+        colorPrimary: {
+          backgroundColor: HORIZON_ACCENT_BLUE,
+          color: HORIZON_TEXT_PRIMARY,
+          border: `1px solid ${HORIZON_GOLD}`,
+          '&:hover': {
+            backgroundColor: HORIZON_MEDIUM_BLUE,
+            boxShadow: `0 0 12px rgba(212, 175, 55, 0.4)`,
+          },
+        },
+        colorSecondary: {
+          backgroundColor: HORIZON_GOLD,
+          color: HORIZON_DEEP_BLUE,
+          border: `1px solid ${FFXI_BRONZE}`,
+          '&:hover': {
+            backgroundColor: HORIZON_LIGHT_GOLD,
+            boxShadow: `0 0 12px rgba(212, 175, 55, 0.6)`,
+          },
+        },
+      },
+    },
   },
 });

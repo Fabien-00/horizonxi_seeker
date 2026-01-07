@@ -27,12 +27,12 @@ function App() {
   const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<number>>(() => {
     try {
       const storedKnownPlayerCharIds = localStorage.getItem('knownPlayerCharIds');
-      const result = storedKnownPlayerCharIds ? new Set(JSON.parse(storedKnownPlayerCharIds)) : new Set();
+      const result = storedKnownPlayerCharIds ? new Set<number>(JSON.parse(storedKnownPlayerCharIds)) : new Set<number>();
       console.log('🔄 Loaded knownPlayerCharIds from localStorage:', result.size, 'players');
       return result;
     } catch (error) {
       console.error('❌ Failed to load knownPlayerCharIds from localStorage:', error);
-      return new Set();
+      return new Set<number>();
     }
   });
 
@@ -286,81 +286,87 @@ if (fetchDataRef.current) {
       console.log(`🔔 ALERT TRIGGERED! ${newPlayersMatchingFilters.length} new players matching filters:`, newPlayersMatchingFilters.map(p => p.charname));
       
       // Play FFXI-style ring notification sound
-      try {
-        console.log('🔊 Attempting to play notification sound...');
-        
-        // Check if we're in a secure context (required for many audio features)
-        if (!window.isSecureContext) {
-          console.warn('⚠️ Not in secure context - audio may not work properly');
-        }
-        
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        
-        // Check if AudioContext is suspended (common in modern browsers)
-        if (audioContext.state === 'suspended') {
-          console.log('⚠️ AudioContext is suspended. Attempting to resume...');
-          await audioContext.resume();
-          console.log('✅ AudioContext resumed, state:', audioContext.state);
-        }
-        
-        // Double-check the state after resume attempt
-        if (audioContext.state !== 'running') {
-          console.warn('⚠️ AudioContext not running after resume attempt. State:', audioContext.state);
-          // Try to create a user-initiated audio context
-          document.addEventListener('click', async () => {
-            await audioContext.resume();
-            console.log('✅ AudioContext resumed after user interaction');
-          }, { once: true });
-        }
-        
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        // FFXI-style bell ring: high frequency with quick decay
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.3);
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
-        
-        console.log('✅ Notification sound played successfully');
-      } catch (err) {
-        console.log('❌ Audio notification failed:', err);
-        
-        // Fallback: Try to use a simple beep or show a visual notification
+      const playNotificationSound = async () => {
         try {
-          // Try the old-school beep method as fallback
-          console.log('🔄 Trying fallback notification methods...');
+          console.log('🔊 Attempting to play notification sound...');
           
-          // Visual notification fallback
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('FFXI Party Finder', {
-              body: `${newPlayersMatchingFilters.length} new players found!`,
-              icon: '/vite.svg'
-            });
-            console.log('✅ Visual notification shown');
-          } else if ('Notification' in window && Notification.permission !== 'denied') {
-            // Request permission for future notifications
-            Notification.requestPermission().then(permission => {
-              if (permission === 'granted') {
-                new Notification('FFXI Party Finder', {
-                  body: `${newPlayersMatchingFilters.length} new players found!`,
-                  icon: '/vite.svg'
-                });
-              }
-            });
+          // Check if we're in a secure context (required for many audio features)
+          if (!window.isSecureContext) {
+            console.warn('⚠️ Not in secure context - audio may not work properly');
           }
-        } catch (fallbackErr) {
-          console.log('❌ All notification methods failed:', fallbackErr);
+          
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          
+          // Check if AudioContext is suspended (common in modern browsers)
+          if (audioContext.state === 'suspended') {
+            console.log('⚠️ AudioContext is suspended. Attempting to resume...');
+            await audioContext.resume();
+            console.log('✅ AudioContext resumed, state:', audioContext.state);
+          }
+          
+          // Double-check the state after resume attempt
+          if (audioContext.state !== 'running') {
+            console.warn('⚠️ AudioContext not running after resume attempt. State:', audioContext.state);
+            // Try to create a user-initiated audio context
+            document.addEventListener('click', async () => {
+              await audioContext.resume();
+              console.log('✅ AudioContext resumed after user interaction');
+            }, { once: true });
+          }
+          
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          // FFXI-style bell ring: high frequency with quick decay
+          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+          oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.3);
+          
+          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.5);
+          
+          console.log('✅ Notification sound played successfully');
+        } catch (err) {
+          console.log('❌ Audio notification failed:', err);
+          
+          // Fallback: Try to use a simple beep or show a visual notification
+          try {
+            // Try the old-school beep method as fallback
+            console.log('🔄 Trying fallback notification methods...');
+            
+            // Visual notification fallback
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('FFXI Party Finder', {
+                body: `${newPlayersMatchingFilters.length} new players found!`,
+                icon: '/vite.svg'
+              });
+              console.log('✅ Visual notification shown');
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+              // Request permission for future notifications
+              Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                  new Notification('FFXI Party Finder', {
+                    body: `${newPlayersMatchingFilters.length} new players found!`,
+                    icon: '/vite.svg'
+                  });
+                }
+              });
+            }
+          } catch (fallbackErr) {
+            console.log('❌ All notification methods failed:', fallbackErr);
+          }
         }
-      }
+      };
+      
+      // Call the async function
+      playNotificationSound();
+      
       console.log("Alert: New players (isNew=true) matching filters!", newPlayersMatchingFilters.map(p => p.charname));
       
       // Update newPlayerRefreshCount for newly added players
@@ -491,7 +497,7 @@ if (fetchDataRef.current) {
       {/* Container styling adjusted to match the image's full-width feel for content area */}
       <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', backgroundColor: 'transparent' }}>
         <Container maxWidth={false} disableGutters sx={{ 
-          width: '80%', // Set width to 80%
+          width: '80%', // Reverted back to 80%
           // mt: 0, mb: 0, p:0, // Remove default container margins and paddings if going full screen
           backgroundColor: 'transparent', // Main content area background
           minHeight: 'calc(100vh - 56px)', // Assuming AppBar height is around 56px (theme.mixins.toolbar.minHeight)

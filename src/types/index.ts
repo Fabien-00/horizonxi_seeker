@@ -55,11 +55,11 @@ export interface ApiResponse {
 
 export type Job = 
   | 'WAR' | 'MNK' | 'WHM' | 'BLM' | 'RDM' | 'THF' | 'PLD' | 'DRK' | 'BST' | 'BRD' | 'RNG' 
-  | 'SAM' | 'NIN' | 'DRG' | 'SMN' | 'BLU' | 'COR' | 'PUP' | 'DNC' | 'GEO' | 'RUN' | 'MON';
+  | 'SAM' | 'NIN' | 'DRG' | 'SMN' | 'BLU' | 'COR' | 'PUP' | 'DNC';
 
-export const JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU', 'COR', 'PUP', 'DNC', 'GEO', 'RUN', 'MON'];
+export const JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU', 'COR', 'PUP', 'DNC'];
 
-export const HORIZON_JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU', 'COR', 'PUP', 'DNC', 'GEO', 'RUN', 'MON'];
+export const HORIZON_JOB_ABBREVIATIONS: Job[] = ['WAR', 'MNK', 'WHM', 'BLM', 'RDM', 'THF', 'PLD', 'DRK', 'BST', 'BRD', 'RNG', 'SAM', 'NIN', 'DRG', 'SMN', 'BLU', 'COR', 'PUP', 'DNC'];
 
 export type JobAbbreviation = typeof HORIZON_JOB_ABBREVIATIONS[number];
 
@@ -68,8 +68,7 @@ export const JOB_COLORS: Record<JobAbbreviation | string, string> = {
   'RDM': '#da7aac', 'THF': '#d9c653', 'PLD': '#adcdea', 'DRK': '#ad1b34',
   'BST': '#95b998', 'BRD': '#e66fd0', 'RNG': '#97bd66', 'SAM': '#cca300',
   'NIN': '#874f9f', 'DRG': '#6c89d6', 'SMN': '#28b463', 'BLU': '#2e86c1',
-  'COR': '#cc6d1e', 'PUP': '#7a7a7a', 'DNC': '#ce4335', 'SCH': '#17a589',
-  'GEO': '#874f9f', 'RUN': '#2e86c1', 'MON': '#8c4827'
+  'COR': '#cc6d1e', 'PUP': '#7a7a7a', 'DNC': '#ce4335', 'SCH': '#17a589'
 } as const;
 
 export const NATION_COLORS = {
