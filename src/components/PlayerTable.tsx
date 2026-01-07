@@ -50,6 +50,14 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
 }) => {
   const theme = useTheme();
 
+  // Handle character name clicks
+  const handleCharacterClick = (charname: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    const url = `https://horizonxi.com/players/${encodeURIComponent(charname)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    console.log(`🔗 Opening player profile: ${url}`);
+  };
+
   return (
     <Paper 
       elevation={0} 
@@ -63,20 +71,21 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
       }}
     >
       <Box sx={{
-        padding: theme.spacing(2, 2, 1.5, 2), // Adjusted padding
+        padding: theme.spacing(0.5, 2, 0.5, 2), // Even more reduced padding
         backgroundColor: theme.palette.background.default,
         borderBottom: `1px solid ${theme.palette.divider}` // Added a bottom border
       }}>
-        <Typography variant="h5" sx={{
+        <Typography variant="body2" sx={{
           fontWeight: 'bold',
-          color: 'white', // Changed color to primary.main
+          color: 'white',
           textAlign: 'left',
+          fontSize: '0.875rem',
         }}>
           {totalPlayers} SEEKING
         </Typography>
       </Box>
       <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <Table stickyHeader aria-label="player table" sx={{ minWidth: 650 }}>
+        <Table stickyHeader aria-label="player table" sx={{ minWidth: 500 }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: theme.palette.grey[900] }}>{/* Darker background for header */}
               <TableCell 
@@ -84,45 +93,86 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                   color: theme.palette.common.white, 
                   fontWeight: 'bold', 
                   borderBottom: `1px solid ${theme.palette.grey[700]}`, 
-                  padding: theme.spacing(1, 1.5),
+                  padding: theme.spacing(0.4, 0.75),
                   cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.2px',
                   '&:hover': { backgroundColor: theme.palette.grey[800] }
                 }}
                 onClick={() => onSort('charname')}
               >
                 Charname {sortBy === 'charname' && (sortOrder === 'asc' ? '↑' : '↓')}
               </TableCell>
-              <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Main Job</TableCell>
+              <TableCell sx={{ 
+                color: theme.palette.common.white, 
+                fontWeight: 'bold', 
+                borderBottom: `1px solid ${theme.palette.grey[700]}`, 
+                padding: theme.spacing(0.4, 0.75),
+                fontSize: '0.75rem',
+                letterSpacing: '0.2px'
+              }}>Main Job</TableCell>
               <TableCell 
                 sx={{ 
                   color: theme.palette.common.white, 
                   fontWeight: 'bold', 
                   borderBottom: `1px solid ${theme.palette.grey[700]}`, 
-                  padding: theme.spacing(1, 1.5),
+                  padding: theme.spacing(0.4, 0.75),
                   cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.2px',
                   '&:hover': { backgroundColor: theme.palette.grey[800] }
                 }}
                 onClick={() => onSort('mlvl')}
               >
                 Main Lvl {sortBy === 'mlvl' && (sortOrder === 'asc' ? '↑' : '↓')}
               </TableCell>
-              <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Sub Job</TableCell>
+              <TableCell sx={{ 
+                color: theme.palette.common.white, 
+                fontWeight: 'bold', 
+                borderBottom: `1px solid ${theme.palette.grey[700]}`, 
+                padding: theme.spacing(0.4, 0.75),
+                fontSize: '0.75rem',
+                letterSpacing: '0.2px'
+              }}>Sub Job</TableCell>
               <TableCell 
                 sx={{ 
                   color: theme.palette.common.white, 
                   fontWeight: 'bold', 
                   borderBottom: `1px solid ${theme.palette.grey[700]}`, 
-                  padding: theme.spacing(1, 1.5),
+                  padding: theme.spacing(0.4, 0.75),
                   cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.2px',
                   '&:hover': { backgroundColor: theme.palette.grey[800] }
                 }}
                 onClick={() => onSort('slvl')}
               >
                 Sub Lvl {sortBy === 'slvl' && (sortOrder === 'asc' ? '↑' : '↓')}
               </TableCell>
-              <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Other Jobs</TableCell>
-              <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Seacom Type</TableCell>
-              <TableCell sx={{ color: theme.palette.common.white, fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.grey[700]}`, padding: theme.spacing(1, 1.5) }}>Seacom Message</TableCell>
+              <TableCell sx={{ 
+                color: theme.palette.common.white, 
+                fontWeight: 'bold', 
+                borderBottom: `1px solid ${theme.palette.grey[700]}`, 
+                padding: theme.spacing(0.4, 0.75),
+                fontSize: '0.75rem',
+                letterSpacing: '0.2px'
+              }}>Other Jobs</TableCell>
+              <TableCell sx={{ 
+                color: theme.palette.common.white, 
+                fontWeight: 'bold', 
+                borderBottom: `1px solid ${theme.palette.grey[700]}`, 
+                padding: theme.spacing(0.4, 0.75),
+                fontSize: '0.75rem',
+                letterSpacing: '0.2px'
+              }}>Seacom Type</TableCell>
+              <TableCell sx={{ 
+                color: theme.palette.common.white, 
+                fontWeight: 'bold', 
+                borderBottom: `1px solid ${theme.palette.grey[700]}`, 
+                padding: theme.spacing(0.4, 0.75),
+                fontSize: '0.75rem',
+                letterSpacing: '0.2px'
+              }}>Seacom Message</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -130,7 +180,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
               <TableRow>
                 <TableCell colSpan={8} sx={{ // Adjusted colSpan to 8 to account for new 'Other Jobs' column
                   textAlign: 'center',
-                  padding: theme.spacing(3),
+                  padding: theme.spacing(2),
                   color: theme.palette.text.secondary,
                   flexGrow: 1,
                   display: 'flex',
@@ -144,7 +194,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
               <TableRow>
                 <TableCell colSpan={8} sx={{ // Adjusted colSpan to 8 to account for new 'Other Jobs' column
                   textAlign: 'center',
-                  padding: theme.spacing(3),
+                  padding: theme.spacing(2),
                   color: theme.palette.text.secondary,
                   flexGrow: 1,
                   display: 'flex',
@@ -168,23 +218,40 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                     transition: 'background-color 0.3s ease',
                   }}
                 >
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>
+                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(0.5, 0.75) }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>{player.charname}</Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          fontWeight: 600, 
+                          color: theme.palette.text.primary,
+                          fontSize: '0.75rem',
+                          letterSpacing: '0.3px',
+                          cursor: 'pointer',
+                          userSelect: 'none', // Prevent text selection on double-click
+                          '&:hover': {
+                            color: theme.palette.text.secondary,
+                          }
+                        }}
+                        onClick={(e) => handleCharacterClick(player.charname, e)}
+                        title="Click to open player profile"
+                      >
+                        {player.charname}
+                      </Typography>
                       {player.isNew && (
                         <Typography 
                           variant="caption" 
                           sx={{ 
-                            ml: 1, 
+                            ml: 0.5, 
                             backgroundColor: theme.palette.secondary.main, 
                             color: theme.palette.secondary.contrastText, 
-                            padding: '3px 8px', 
-                            borderRadius: '6px', 
+                            padding: '2px 6px', 
+                            borderRadius: '4px', 
                             fontWeight: 'bold',
-                            fontSize: '0.7rem',
-                            letterSpacing: '0.5px',
+                            fontSize: '0.65rem',
+                            letterSpacing: '0.3px',
                             textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                           }}
                         >
                           NEW
@@ -192,101 +259,129 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                       )}
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1.5) }}>
+                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(0.5, 0.75) }}>
                     <Chip 
                       label={player.mjob} 
                       size="small"
                       sx={{ 
-                        background: `linear-gradient(135deg, ${JOB_COLORS[player.mjob as Job] || theme.palette.grey[700]}, ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}b3` : theme.palette.grey[800]})`,
-                        color: theme.palette.common.white, // Explicitly set light text color
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                        letterSpacing: '0.5px',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.7)',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-                        border: `1px solid ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}99` : theme.palette.grey[600]}`, 
-                        borderRadius: '3px',
-                        minWidth: '40px',
-                        height: '26px',
-                        transition: 'all 0.2s ease',
-                        backdropFilter: 'blur(3px)',
-                        cursor: 'pointer',
+                        background: `linear-gradient(135deg, ${JOB_COLORS[player.mjob as Job] || '#4A5568'}, ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}cc` : '#2D3748'})`,
+                        color: '#E2E8F0',
+                        fontWeight: 500,
+                        fontSize: '0.6rem',
+                        letterSpacing: '0.2px',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+                        border: `1px solid ${JOB_COLORS[player.mjob as Job] ? `${JOB_COLORS[player.mjob as Job]}66` : '#4A5568'}`, 
+                        borderRadius: '2px',
+                        minWidth: '28px',
+                        height: '18px',
+                        padding: '0 4px',
+                        transition: 'all 0.15s ease',
                         '&:hover': {
-                          transform: 'translateY(-1px) scale(1.02)',
-                          boxShadow: '0 3px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
-                          border: `1px solid ${JOB_COLORS[player.mjob as Job] || theme.palette.grey[500]}`,
-                          cursor: 'pointer',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                          border: `1px solid ${JOB_COLORS[player.mjob as Job] || '#A0AEC0'}`, 
                         }
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>{player.mlvl}</TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>
+                  <TableCell sx={{ 
+                    borderBottom: `1px solid ${theme.palette.divider}`, 
+                    padding: theme.spacing(0.5, 0.75), 
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.3px'
+                  }}>{player.mlvl}</TableCell>
+                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(0.5, 0.75) }}>
                     {player.sjob && player.sjob.trim() !== '' ? (
                       <Chip 
                         label={player.sjob} 
                         size="small"
                         sx={{ 
-                          background: `linear-gradient(135deg, ${JOB_COLORS[player.sjob as Job] || theme.palette.grey[700]}, ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}b3` : theme.palette.grey[800]})`,
-                          color: theme.palette.common.white, // Explicitly set light text color
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                          letterSpacing: '0.5px',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.7)',
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-                          border: `1px solid ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}99` : theme.palette.grey[600]}`, 
-                          borderRadius: '3px',
-                          minWidth: '40px',
-                          height: '26px',
-                          transition: 'all 0.2s ease',
-                          backdropFilter: 'blur(3px)',
-                          cursor: 'pointer',
+                          background: `linear-gradient(135deg, ${JOB_COLORS[player.sjob as Job] || '#4A5568'}, ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}cc` : '#2D3748'})`,
+                          color: '#E2E8F0',
+                          fontWeight: 500,
+                          fontSize: '0.6rem',
+                          letterSpacing: '0.2px',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+                          border: `1px solid ${JOB_COLORS[player.sjob as Job] ? `${JOB_COLORS[player.sjob as Job]}66` : '#4A5568'}`, 
+                          borderRadius: '2px',
+                          minWidth: '28px',
+                          height: '18px',
+                          padding: '0 4px',
+                          transition: 'all 0.15s ease',
                           '&:hover': {
-                            transform: 'translateY(-1px) scale(1.02)',
-                            boxShadow: '0 3px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
-                            border: `1px solid ${JOB_COLORS[player.sjob as Job] || theme.palette.grey[500]}`,
-                            cursor: 'pointer',
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                            border: `1px solid ${JOB_COLORS[player.sjob as Job] || '#A0AEC0'}`, 
                           }
                         }}
                       />
                     ) : (
-                      <span style={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>-</span>
+                      <span style={{ 
+                        color: theme.palette.text.secondary, 
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        letterSpacing: '0.3px'
+                      }}>-</span>
                     )}
                   </TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>{player.slvl}</TableCell>
-                  <TableCell sx={{ color: theme.palette.text.primary, borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1, 1.5) }}>
-                    {player.jobs && Object.entries(player.jobs).map(([job, level]) => (
-                      <Chip 
-                        key={job} 
-                        label={`${job.toUpperCase()} ${level}`} 
-                        size="small" 
+                  <TableCell sx={{ 
+                    borderBottom: `1px solid ${theme.palette.divider}`, 
+                    padding: theme.spacing(0.5, 0.75), 
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.3px'
+                  }}>{player.slvl}</TableCell>
+                  <TableCell sx={{ color: theme.palette.text.primary, borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(0.5, 0.75) }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
+                      {player.jobs && Object.entries(player.jobs).map(([job, level]) => (
+                        <Chip 
+                          key={job} 
+                          label={`${job.toUpperCase()} ${level}`} 
+                          size="small" 
                           sx={{
-                            mr: 0.5, 
-                            mb: 0.5, 
                             background: `linear-gradient(135deg, ${JOB_COLORS[job.toUpperCase() as Job] || '#4A5568'}, ${JOB_COLORS[job.toUpperCase() as Job] ? `${JOB_COLORS[job.toUpperCase() as Job]}cc` : '#2D3748'})`,
                             color: '#E2E8F0',
                             fontWeight: 500,
-                            fontSize: '0.7rem',
-                            letterSpacing: '0.3px',
+                            fontSize: '0.6rem',
+                            letterSpacing: '0.2px',
                             textShadow: '0 1px 2px rgba(0,0,0,0.6)',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
                             border: `1px solid ${JOB_COLORS[job.toUpperCase() as Job] ? `${JOB_COLORS[job.toUpperCase() as Job]}66` : '#4A5568'}`, 
-                            borderRadius: '3px',
-                            minWidth: '35px',
-                            height: '22px',
-                            padding: '0 6px',
+                            borderRadius: '2px',
+                            minWidth: '28px',
+                            height: '18px',
+                            padding: '0 4px',
                             transition: 'all 0.15s ease',
                             '&:hover': {
                               transform: 'translateY(-1px)',
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
                               border: `1px solid ${JOB_COLORS[job.toUpperCase() as Job] || '#A0AEC0'}`, 
                             }
                           }} 
-                      />
-                    ))}
+                        />
+                      ))}
+                    </Box>
                   </TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1) }}>{mapSeacomType(player.seacomType)}</TableCell>
-                  <TableCell sx={{ borderBottom: `1px solid ${theme.palette.divider}`, padding: theme.spacing(1), whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '300px' }}>{player.seacomMessage || '-'}</TableCell>
+                  <TableCell sx={{ 
+                    borderBottom: `1px solid ${theme.palette.divider}`, 
+                    padding: theme.spacing(0.5, 0.75), 
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.3px'
+                  }}>{mapSeacomType(player.seacomType)}</TableCell>
+                  <TableCell sx={{ 
+                    borderBottom: `1px solid ${theme.palette.divider}`, 
+                    padding: theme.spacing(0.5, 0.75), 
+                    whiteSpace: 'pre-wrap', 
+                    wordBreak: 'break-word', 
+                    maxWidth: '250px', 
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    letterSpacing: '0.2px'
+                  }}>{player.seacomMessage || '-'}</TableCell>
                 </TableRow>
               ))
             )}

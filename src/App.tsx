@@ -25,8 +25,15 @@ function App() {
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   // const [newPlayerIds, setNewPlayerIds] = useState<Set<number>>(new Set()); // Removed, redundant
   const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<number>>(() => {
-    const storedKnownPlayerCharIds = localStorage.getItem('knownPlayerCharIds');
-    return storedKnownPlayerCharIds ? new Set(JSON.parse(storedKnownPlayerCharIds)) : new Set();
+    try {
+      const storedKnownPlayerCharIds = localStorage.getItem('knownPlayerCharIds');
+      const result = storedKnownPlayerCharIds ? new Set(JSON.parse(storedKnownPlayerCharIds)) : new Set();
+      console.log('🔄 Loaded knownPlayerCharIds from localStorage:', result.size, 'players');
+      return result;
+    } catch (error) {
+      console.error('❌ Failed to load knownPlayerCharIds from localStorage:', error);
+      return new Set();
+    }
   });
 
 
@@ -36,8 +43,15 @@ function App() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
   const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(() => {
-    const storedNewPlayerRefreshCount = localStorage.getItem('newPlayerRefreshCount');
-    return storedNewPlayerRefreshCount ? new Map(JSON.parse(storedNewPlayerRefreshCount)) : new Map();
+    try {
+      const storedNewPlayerRefreshCount = localStorage.getItem('newPlayerRefreshCount');
+      const result = storedNewPlayerRefreshCount ? new Map(JSON.parse(storedNewPlayerRefreshCount)) : new Map();
+      console.log('🔄 Loaded newPlayerRefreshCount from localStorage:', result.size, 'entries');
+      return result;
+    } catch (error) {
+      console.error('❌ Failed to load newPlayerRefreshCount from localStorage:', error);
+      return new Map();
+    }
   }); // Stores charid -> refresh_cycle_count (0 or 1)
   const [isAutoRefreshPaused, setIsAutoRefreshPaused] = useState<boolean>(false);
 
@@ -106,11 +120,11 @@ const fetchDataRef = useRef<typeof fetchData | null>(null);
             isNewPlayer = true;
             currentKnownPlayerCharIds.add(charId); // Add to known IDs for next cycle
             updatedNewPlayerRefreshCount.set(charId, 0); // Start refresh count at 0
-            console.log(`Player ${p.charname} (ID: ${charId}) is NEW (first time seen). Setting refresh count to 0.`);
+            console.log(`🆕 Player ${p.charname} (ID: ${charId}) is NEW (first time seen). Setting refresh count to 0.`);
           } else if (updatedNewPlayerRefreshCount.has(charId)) {
             // This player was new in a previous cycle and is still within its "new" window
             isNewPlayer = true;
-            console.log(`Player ${p.charname} (ID: ${charId}) is NEW (still in window). Refresh count: ${updatedNewPlayerRefreshCount.get(charId)}`);
+            console.log(`🆕 Player ${p.charname} (ID: ${charId}) is NEW (still in window). Refresh count: ${updatedNewPlayerRefreshCount.get(charId)}`);
           } else {
             console.log(`Player ${p.charname} (ID: ${charId}) is NOT new.`);
           }
@@ -130,9 +144,23 @@ const fetchDataRef = useRef<typeof fetchData | null>(null);
           };
         });
 
+        console.log(`📊 Total players processed: ${formattedPlayers.length}`);
+        console.log(`🆕 Players marked as NEW: ${formattedPlayers.filter(p => p.isNew).length}`);
+        console.log(`🆕 NEW players:`, formattedPlayers.filter(p => p.isNew).map(p => p.charname));
+
         setPlayers(formattedPlayers);
         setKnownPlayerCharIds(currentKnownPlayerCharIds);
         setNewPlayerRefreshCount(updatedNewPlayerRefreshCount);
+        
+        // Persist to localStorage with error handling
+        try {
+          localStorage.setItem('knownPlayerCharIds', JSON.stringify(Array.from(currentKnownPlayerCharIds)));
+          localStorage.setItem('newPlayerRefreshCount', JSON.stringify(Array.from(updatedNewPlayerRefreshCount.entries())));
+          console.log('💾 Successfully saved to localStorage');
+        } catch (error) {
+          console.error('❌ Failed to save to localStorage:', error);
+        }
+        
         console.log('Updated knownPlayerCharIds:', currentKnownPlayerCharIds);
         console.log('Updated newPlayerRefreshCount:', updatedNewPlayerRefreshCount);
 
@@ -233,6 +261,19 @@ if (fetchDataRef.current) {
     });
   }, [players, filterOptions]);
 
+  // Add environment detection
+  useEffect(() => {
+    console.log('🌍 Environment Info:');
+    console.log('- URL:', window.location.href);
+    console.log('- Protocol:', window.location.protocol);
+    console.log('- Secure Context:', window.isSecureContext);
+    console.log('- User Agent:', navigator.userAgent);
+    console.log('- localStorage available:', typeof Storage !== 'undefined');
+    console.log('- AudioContext available:', !!(window.AudioContext || (window as any).webkitAudioContext));
+    console.log('- Notification API available:', 'Notification' in window);
+    console.log('- Notification permission:', 'Notification' in window ? Notification.permission : 'N/A');
+  }, []);
+
   const prevFilteredPlayersRef = useRef<PlayerRow[]>([]);
   useEffect(() => {
     const previousFilteredIds = new Set(prevFilteredPlayersRef.current.map(p => p.charid));
@@ -242,9 +283,36 @@ if (fetchDataRef.current) {
     const newPlayersMatchingFilters = newlyAddedToFilteredView.filter(p => p.isNew);
 
     if (filterOptions.alertEnabled && newPlayersMatchingFilters.length > 0) {
+      console.log(`🔔 ALERT TRIGGERED! ${newPlayersMatchingFilters.length} new players matching filters:`, newPlayersMatchingFilters.map(p => p.charname));
+      
       // Play FFXI-style ring notification sound
       try {
+        console.log('🔊 Attempting to play notification sound...');
+        
+        // Check if we're in a secure context (required for many audio features)
+        if (!window.isSecureContext) {
+          console.warn('⚠️ Not in secure context - audio may not work properly');
+        }
+        
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        
+        // Check if AudioContext is suspended (common in modern browsers)
+        if (audioContext.state === 'suspended') {
+          console.log('⚠️ AudioContext is suspended. Attempting to resume...');
+          await audioContext.resume();
+          console.log('✅ AudioContext resumed, state:', audioContext.state);
+        }
+        
+        // Double-check the state after resume attempt
+        if (audioContext.state !== 'running') {
+          console.warn('⚠️ AudioContext not running after resume attempt. State:', audioContext.state);
+          // Try to create a user-initiated audio context
+          document.addEventListener('click', async () => {
+            await audioContext.resume();
+            console.log('✅ AudioContext resumed after user interaction');
+          }, { once: true });
+        }
+        
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
@@ -261,8 +329,37 @@ if (fetchDataRef.current) {
         
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
+        
+        console.log('✅ Notification sound played successfully');
       } catch (err) {
-        console.log('Audio notification not available:', err);
+        console.log('❌ Audio notification failed:', err);
+        
+        // Fallback: Try to use a simple beep or show a visual notification
+        try {
+          // Try the old-school beep method as fallback
+          console.log('🔄 Trying fallback notification methods...');
+          
+          // Visual notification fallback
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('FFXI Party Finder', {
+              body: `${newPlayersMatchingFilters.length} new players found!`,
+              icon: '/vite.svg'
+            });
+            console.log('✅ Visual notification shown');
+          } else if ('Notification' in window && Notification.permission !== 'denied') {
+            // Request permission for future notifications
+            Notification.requestPermission().then(permission => {
+              if (permission === 'granted') {
+                new Notification('FFXI Party Finder', {
+                  body: `${newPlayersMatchingFilters.length} new players found!`,
+                  icon: '/vite.svg'
+                });
+              }
+            });
+          }
+        } catch (fallbackErr) {
+          console.log('❌ All notification methods failed:', fallbackErr);
+        }
       }
       console.log("Alert: New players (isNew=true) matching filters!", newPlayersMatchingFilters.map(p => p.charname));
       
@@ -271,6 +368,10 @@ if (fetchDataRef.current) {
       // This effect primarily handles the alert sound and logging.
       // No need to directly manipulate newPlayerRefreshCount here for setting isNew,
       // as fetchData already does that. We just need to ensure the dependency array is correct.
+    } else {
+      if (filterOptions.alertEnabled && newlyAddedToFilteredView.length > 0) {
+        console.log(`🔕 Alert enabled but no NEW players in newly added: ${newlyAddedToFilteredView.length} added, ${newlyAddedToFilteredView.filter(p => p.isNew).length} marked as new`);
+      }
     }
     prevFilteredPlayersRef.current = filteredPlayers;
   }, [filteredPlayers, filterOptions.alertEnabled, newPlayerRefreshCount]); // Updated dependency array

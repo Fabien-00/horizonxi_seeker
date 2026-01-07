@@ -239,6 +239,7 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange }) 
           <NotificationsOff />
         )}
       </IconButton>
+
       {/* Removed Hide Full Parties Checkbox */}
     </Paper>
   );
