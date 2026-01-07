@@ -10,7 +10,6 @@ import {
   Chip,
   Stack,
   Divider,
-  Button,
   Tooltip
 } from '@mui/material';
 import { 
@@ -22,9 +21,6 @@ import {
   Security,
   LocalHospital,
   Whatshot,
-  Groups,
-  Person,
-  Group
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { type FilterOptions, type Job, JOB_COLORS } from '../types/index';
@@ -221,36 +217,6 @@ const FilterBar: React.FC<FilterBarProps> = ({ filterOptions, onFilterChange, pl
     const newFilters = {
       ...localFilters,
       [jobType === 'main' ? 'mainJobs' : 'subJobs']: newJobs,
-      selectedJobs: [],
-    };
-    setLocalFilters(newFilters);
-    debouncedFilterChange(newFilters);
-  };
-
-  // Job combination presets
-  const handleJobPreset = (preset: string) => {
-    let mainJobs: Job[] = [];
-    let subJobs: Job[] = [];
-    
-    switch (preset) {
-      case 'tank-heal':
-        mainJobs = [...TANK_JOBS, ...HEAL_JOBS];
-        break;
-      case 'full-party':
-        mainJobs = [...TANK_JOBS, ...HEAL_JOBS, ...DD_JOBS.slice(0, 4)];
-        break;
-      case 'exp-party':
-        mainJobs = [...TANK_JOBS.slice(0, 1), ...HEAL_JOBS.slice(0, 1), ...DD_JOBS.slice(0, 4)];
-        break;
-      case 'endgame':
-        mainJobs = ['PLD', 'WHM', 'BLM', 'RDM', 'THF', 'WAR'];
-        break;
-    }
-    
-    const newFilters = {
-      ...localFilters,
-      mainJobs,
-      subJobs,
       selectedJobs: [],
     };
     setLocalFilters(newFilters);
