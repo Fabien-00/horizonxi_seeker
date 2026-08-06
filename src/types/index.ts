@@ -3,14 +3,14 @@ export type JobLevels = {
 };
 
 export interface PlayerData { // Renamed from Player to PlayerData to match usage in App.tsx as raw API data
-  charid?: number; // Added charid as it's used in App.tsx
+  charid?: string | number;
   charname: string;
   avatar?: string; // Made optional as it's handled in App.tsx
   nation?: string; // Assuming these might be optional from API
   rank?: number;
   mjob: string; // Keep as Job, will be cast in App.tsx
   mlvl: number;
-  sjob: string; // Keep as Job, will be cast in App.tsx
+  sjob: string | null; // The API returns null when a character has no support job
   slvl: number;
   jobs?: JobLevels; // Assuming optional
   seacomType?: number;
@@ -20,7 +20,7 @@ export interface PlayerData { // Renamed from Player to PlayerData to match usag
 }
 
 export interface PlayerRow {
-  charid: number; // Ensured charid is present
+  charid: string | number;
   avatar: string;
   charname: string;
   mjob: Job;

@@ -4,4 +4,13 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/api/lfp': {
+        target: 'https://api.horizonxi.com',
+        changeOrigin: true,
+        rewrite: () => '/api/v1/chars/lfp',
+      },
+    },
+  },
 })

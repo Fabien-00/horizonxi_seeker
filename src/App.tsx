@@ -24,15 +24,15 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   // const [newPlayerIds, setNewPlayerIds] = useState<Set<number>>(new Set()); // Removed, redundant
-  const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<number>>(() => {
+  const [knownPlayerCharIds, setKnownPlayerCharIds] = useState<Set<string | number>>(() => {
     try {
       const storedKnownPlayerCharIds = localStorage.getItem('knownPlayerCharIds');
-      const result = storedKnownPlayerCharIds ? new Set<number>(JSON.parse(storedKnownPlayerCharIds)) : new Set<number>();
+      const result = storedKnownPlayerCharIds ? new Set<string | number>(JSON.parse(storedKnownPlayerCharIds)) : new Set<string | number>();
       console.log('🔄 Loaded knownPlayerCharIds from localStorage:', result.size, 'players');
       return result;
     } catch (error) {
       console.error('❌ Failed to load knownPlayerCharIds from localStorage:', error);
-      return new Set<number>();
+      return new Set<string | number>();
     }
   });
 
@@ -42,7 +42,7 @@ function App() {
   const [sortBy, setSortBy] = useState<'mlvl' | 'slvl' | 'charname' | null>('mlvl');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
-  const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<number, number>>(() => {
+  const [newPlayerRefreshCount, setNewPlayerRefreshCount] = useState<Map<string | number, number>>(() => {
     try {
       const storedNewPlayerRefreshCount = localStorage.getItem('newPlayerRefreshCount');
       const result = storedNewPlayerRefreshCount ? new Map(JSON.parse(storedNewPlayerRefreshCount)) : new Map();
@@ -72,8 +72,9 @@ const fetchDataRef = useRef<typeof fetchData | null>(null);
     }
     setError(null);
     try {
-      // API endpoint is already corrected in the viewed file.
-      const response = await fetch('https://api.horizonxi.com/api/v1/chars/lfp'); 
+      // The HorizonXI API no longer permits browser cross-origin requests.
+      // Keep the upstream request on our server, where CORS does not apply.
+      const response = await fetch('/api/lfp');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -110,8 +111,9 @@ const fetchDataRef = useRef<typeof fetchData | null>(null);
           });
         }
 
-        const formattedPlayers: PlayerRow[] = apiResponseData.chars.map((p: PlayerData, index: number) => {
-          const charId = p.charid || index; // Use index as fallback, though charid should be reliable
+        const formattedPlayers: PlayerRow[] = apiResponseData.chars.map((p: PlayerData) => {
+          // The API no longer returns charid; names remain stable across requests.
+          const charId = p.charid ?? p.charname;
           let isNewPlayer = false;
           console.log(`Processing player ${p.charname} (ID: ${charId})`);
 
